@@ -1,0 +1,79 @@
+= Overview of the Java
+:navtitle: Java
+:description: Write documentation without leaving your IDE. \
+Preview your docs locally before publishing them. \
+Collaborate using a version control system.
+
+////
+This is the start page of plugin's documentation, and therefore likely the first thing people read.
+This doc provides a brief overview of the functionality this plugin provides.
+
+Write about why it is a good idea to use AsciiDoc and the plugin (and maybe when not to use it).
+Mention unique-selling-propositions (USP) that differentiate this plugin from others.
+
+Assumed reader type: someone who is new to the plugin, but might have heard about AsciiDoc before.
+////
+
+{description}
+Publish with confidence using automated builds.
+
+== Some topic need to refer
+. Google's open source *AutoValue* https://github.com/google/auto/tree/main/value
+
+== Writing technical documentation
+
+.Optional Title
+****
+Sidebars are used to visually separate auxiliary bits of content
+that supplement the main text.
+
+TIP: They can contain any type of content.
+
+.Source code block in a sidebar
+[source,js]
+----
+const { expect, expectCalledWith, heredoc } = require('../test/test-utils')
+----
+****
+
+
+The sequence diagram is below:
+
+[mermaid]
+....
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+....
+
+
+<hr style="border:1px solid gray"> </hr>
+
+The **Java Collections Framework** is a set of interfaces and classes in the packages
+`java.util` and `java.util.concurrent`.
+
+They provide client programs with various models of how to organize their objects, and various implementations of each model. These models are sometimes called **abstract data types**, and we need them because different programs need different ways of organizing their objects.
+
+<hr style="border:1px solid gray"> </hr>
+
+* Below shows the main interface of the Java Collection Framework
+
+{{< figure src="../Collections/images/collection_image_1.png" width=100% >}}
+
+* `Iterable` defines the contract that a class has to fulfill for its instances to be usable with the `foreach` statement. It is not part of collection framework.
+
+## Purpose Of Collections
+
+1. `Collection` contains the core functionality required of any collection other than a `map`. It has no direct concrete implementations; the concrete collection classes all implement one of its sub-interfaces as well.
+
+2. `Set` is a collection, **without duplicates**, in which **order is not significant**. `SortedSet` automatically sorts its elements and returns them in order. `NavigableSet` extends this, adding methods to find the closest matches to a target element.
+
+3. `Queue` is a collection designed to accept elements at its _tail_ for processing, yielding them up at its _head_ in the order in which they are to be processed. Its subinterface `Deque` extends this by allowing elements to be added or removed at both head and tail. `Queue` and `Deque` have sub-interfaces, `BlockingQueue` and `BlockingDeque` respectively, that support concurrent access and allow threads to be blocked, indefinitely or for a maximum time, until the requested operation can be carried out.
+
+4. `List` is a collection in which order is significant, accommodating duplicate elements.
+
+5. `Map` is a collection which uses key-value associations to store and retrieve elements. It is extended by `ConcurrentMap`, which provides support for concurrent access, by `SortedMap`, which guarantees to return its values in ascending key order, by `Navigable-Map` which `extends SortedMap` to find the closest matches to a target element, and by `ConcurrentNavigableMap` which extends `ConcurrentMap` and `NavigableMap`.
+
+<hr style="border:1px solid gray"> </hr>

@@ -1,0 +1,402 @@
+= Overview of the Collections
+:navtitle: Collections
+:description: 
+
+{description}
+
+.Book Reference
+[%collapsible]
+====
+1. **_Java Generics And Collections_**
+====
+
+== Collections
+
+The *Java Collections Framework* is a set of interfaces and classes in the packages
+`java.util` and `java.util.concurrent`.
+
+They provide client programs with various models of how to organize their objects, and various implementations of each model. These models are sometimes called *abstract data types*, and we need them because different programs need different ways of organizing their objects.
+
+* Below shows the main interface of the Java Collection Framework
+
+{{< figure src="../Collections/images/collection_image_1.png" width=100% >}}
+
+* `Iterable` defines the contract that a class has to fulfill for its instances to be usable with the `foreach` statement. It is not part of collection framework.
+
+== Purpose Of Collections
+
+1. `Collection` contains the core functionality required of any collection other than a `map`. It has no direct concrete implementations; the concrete collection classes all implement one of its sub-interfaces as well.
+
+2. `Set` is a collection, **without duplicates**, in which **order is not significant**. `SortedSet` automatically sorts its elements and returns them in order. `NavigableSet` extends this, adding methods to find the closest matches to a target element.
+
+3. `Queue` is a collection designed to accept elements at its _tail_ for processing, yielding them up at its _head_ in the order in which they are to be processed. Its subinterface `Deque` extends this by allowing elements to be added or removed at both head and tail. `Queue` and `Deque` have sub-interfaces, `BlockingQueue` and `BlockingDeque` respectively, that support concurrent access and allow threads to be blocked, indefinitely or for a maximum time, until the requested operation can be carried out.
+
+4. `List` is a collection in which order is significant, accommodating duplicate elements.
+
+5. `Map` is a collection which uses key-value associations to store and retrieve elements. It is extended by `ConcurrentMap`, which provides support for concurrent access, by `SortedMap`, which guarantees to return its values in ascending key order, by `Navigable-Map` which `extends SortedMap` to find the closest matches to a target element, and by `ConcurrentNavigableMap` which extends `ConcurrentMap` and `NavigableMap`.
+
+---
+
+== Collection Interface
+
+* It defines the core functionality of any collection which can be classified into 4 groups.
+
+=== Adding Elements
+
+```
+boolean add(E e)                           // add the element e
+boolean addAll(Collection<? extends E> c)  // add the contents of c
+
+```
+
+=== Removing Elements
+
+```
+boolean remove(Object o)            // remove the element o
+void clear()                        // remove all elements
+boolean removeAll(Collection<?> c)  // remove the elements in c
+boolean retainAll(Collection<?> c)  // remove the elements *not* in c
+
+```
+
+=== Querying the Content of an Collections
+
+```
+boolean contains(Object o)            // true if o is present
+boolean containsAll(Collection<?> c)  // true if all elements of c
+                                      // are present in the collection
+boolean isEmpty()                     // true if no elements are present
+int size()                            // return the element count (or
+                                      // Integer.MAX_VALUE if that is less)
+
+```
+
+=== Making a Collection’s Contents Available for Further Processing
+
+```
+Iterator<E> iterator()          // return an Iterator over the elements
+Object[] toArray()              // copy contents to an Object[]
+
+<T> T[] toArray(T[] t)          // copy contents to a T[] (for any T)
+```
+
+
+<hr style="border:1px solid gray"> </hr>
+
+## Implementing Collections
+
+* There are **no concrete implementations of `Collection`**.
+  * The class `AbstractCollection`, which partially implements it, is **one of a series of skeletal implementations including** `AbstractSet`, `AbstractList`, and so on— **which provide functionality common to the different concrete implementations of each interface**.
+  
+* These skeletal implementations are available to help the designer of new implementations of the Framework interfaces.
+
+The three main kinds of operations that most collection interfaces requires are:
+
+  1. insertion and removal of elements by position,
+  2. retrieval of elements by content, and
+  3. iteration over the collection elements.
+
+****
+
+Below are the main structure used as the basis of the implementations:
+
+#### Arrays
+
+* Arrays are implemented directly in hardware,
+* they have the properties of random-access memory: very fast for accessing elements by position and for iterating over them,
+* but slower for inserting and removing elements at arbitrary positions (because that may require adjusting the position of other elements).
+* Arrays are used in the Collections Framework as the backing structure for `ArrayList`, `CopyOnWriteArrayList`, ``EnumSet` and `EnumMap`, and for many of the`Queue` and `Deque` implementations.
+
+#### Linked lists
+
+* As the name implies, these consist of chains of linked cells.
+* Each cell contains a reference to data and a reference to the next cell in the list (and, in some implementations, the previous cell).
+* Linked lists perform quite differently from arrays: accessing elements by position is slow, because you have to follow the reference chain from the start of the list, but insertion and removal operations can be performed in constant time by rearranging the cell references.
+* Linked lists are the primary backing structure used for the classes `ConcurrentLinkedQueue`, `LinkedBlockingQueue`, and `LinkedList`, and the new skip list collections `ConcurrentSkipListSet` and `ConcurrentSkipListMap`.
+* They are also used in implementing `HashSet` and `LinkedHashSet`.
+
+#### Hash tables
+
+* These provide a way of storing elements indexed on their content rather than on an integer-valued index, as with lists.
+* In contrast to arrays and linked lists, hash tables provide no support for accessing elements by position, but access by content is usally very fast, as are insertion and removal.
+* Hash tables are the backing structure for many `Set` and `Map` implementations, including `HashSet` and `LinkedHashSet` together with the corresponding maps `HashMap` and `LinkedHashMap`, as well as `WeakHashMap`, `IdentityHashMap` and `ConcurrentHashMap`.
+
+#### Trees
+
+* These also organize their elements by content, but with the important difference that **they can store and retrieve them in sorted order**.
+* They are relatively fast for the operations of inserting and removing elements, accessing them by content and iterating over them.
+* Trees are the backing structures for `TreeSet` and `TreeMap`. `Priority heaps`, used in the implementation of `PriorityQueue` and `PriorityBlockingQueue`, are treerelated structures.
+
+****
+
+## Collection Constructors
+
+* Two common forms of constructor which are shared by most collection implementations.
+  
+>> Taking HashSet as an example, these are:
+
+```
+public HashSet() // Creates empty set
+public HashSet(Collection<? extends E> c)
+
+```
+
+The first of these
+
+* **creates an empty set**, and
+* **the second a set that will contain the elements of any collection of the parametric type.**
+
+* Using this constructor has the same effect **as creating an empty set with the default constructor**, and **then adding the contents of a collection using `addAll`**.
+
+* This is sometimes called a **“copy constructor”** or **“conversion constructor”**.
+
+{{< hint info >}}
+
+* Not all `collection` classes have **constructors of both forms**
+for example, `ArrayBlockingQueue`, cannot be created without fixing its capacity, and `SynchronousQueue` cannot hold any elements at all, so no constructor of the second form is appropriate.
+
+* In addition, many collection classes have other constructors besides these two, but which ones they have depends not on the `interface` they implement but on the underlying implementation; these additional constructors are used to configure the implementation.
+  
+{{< /hint >}}
+
+*****
+<hr style="border:1px solid gray"> </hr>
+
+## Traversing Collections
+
+* There are three ways to traverse collections:
+
+1. using aggregate operations
+2. with the for-each construct and
+3. by using Iterators.
+
+### Aggregate Operations
+
+In JDK 8 and later, the preferred method of iterating over a collection is to obtain a stream and perform aggregate operations on it. **Aggregate operations are often used in conjunction with lambda expressions to make programming more expressive, using less lines of code.** The following code sequentially iterates through a collection of shapes and prints out the red objects:
+
+```
+myShapesCollection.stream()
+.filter(e -> e.getColor() == Color.RED)
+.forEach(e -> System.out.println(e.getName()));
+
+```
+
+Likewise, you could easily request a parallel stream, which might make sense if the collection is large enough and your computer has enough cores:
+
+```
+myShapesCollection.parallelStream()
+.filter(e -> e.getColor() == Color.RED)
+.forEach(e -> System.out.println(e.getName()));
+
+```
+
+There are many different ways to collect data with this API. For example, you might want to convert the elements of a Collection to String objects, then join them, separated by commas:
+
+    String joined = elements.stream()
+    .map(Object::toString)
+    .collect(Collectors.joining(", "));
+Or perhaps sum the salaries of all employees:
+
+### Pipelines and Streams
+
+* A pipeline is a sequence of aggregate operations. The following example prints the male members contained in the collection roster with a pipeline that consists of the aggregate operations `filter` and `forEach`:
+
+```
+roster
+    .stream()
+    .filter(e -> e.getGender() == Person.Sex.MALE)
+    .forEach(e -> System.out.println(e.getName()));
+
+```
+
+Compare this example to the following that prints the male members contained in the collection roster with a `for-each` loop:
+
+```
+for (Person p : roster) {
+    if (p.getGender() == Person.Sex.MALE) {
+        System.out.println(p.getName());
+    }
+}
+```
+
+* A pipeline contains the following components:
+
+    1. **source**: This could be a collection, an array, a generator function, or an I/O channel. In this example, the source is the collection roster.
+
+    2. **Zero or more intermediate operations**. An intermediate operation, such as **filter**, produces a new **stream**.
+
+     **A stream is a sequence of elements**. Unlike a collection, it is not a data structure that stores elements. Instead, a stream carries values from a source through a pipeline.
+
+     The **filter** operation **returns a new stream that contains elements that match its predicate** (this operation's parameter). In this example, the predicate is the lambda expression e -> e.getGender() == Person.Sex.MALE. It returns the boolean value true if the gender field of object e has the value Person.Sex.MALE. Consequently, the filter operation in this example returns a stream that contains all male members in the collection roster.
+
+    3. **terminal operation**. A **terminal operation**, such as **forEach**, produces a non-stream result, such as a primitive value.
+
+*****
+
+### for-each Construct
+
+The `for-each` construct allows you to concisely traverse a collection or array using a for loop. The following code uses the `for-each` construct to print out each element of a collection on a separate line.
+
+```
+for (Object o : collection)
+    System.out.println(o);
+
+```
+
+### Iterable and Iterators
+
+An iterator is an object that implements the interface `Iterator` and enables you to traverse through a collection and to remove elements from the collection selectively, if desired.
+
+```
+public Iterator<E> {
+  boolean hasNext();   // return true if the iteration has more elements
+  E next();            // return the next element in the iteration
+  void remove();       // remove the last element returned by the iterator
+}
+```
+
+* The purpose of iterators is to provide a uniform way of accessing collection elements sequentially, so whatever kind of collection you are dealing with, and however it is implemented, you always know how to process its elements in turn.
+
+* In Java 5 the Collection interface was made to extend Iterable, so any set, list, or queue can be the target of `foreach`, as can arrays.
+* If you write your own implementation of Iterable, that too can be used with foreach.
+
+* The iterators throw `ConcurrentModificationException` exception whenever they detect that the collection from which they were derived has been structurally changed. The motivation for this behavior is that the iterators are implemented as a view of their underlying collection so, if that collection is structurally changed, the iterator may well not be able to continue operating correctly when it reaches the changed part of the collection. The general-purpose Collections Framework iterators are `fail-fast`.
+* The methods of a `fail-fast` iterator check that the underlying collection has not been structurally changed (by another iterator, or by the methods of the collection itself) since the last iterator method call. If they detect a change, they throw `ConcurrentModificationException`.
+
+{{< hint info >}}
+Use Iterator instead of the for-each construct when you need to:
+
+* Remove the current element. The for-each construct hides the iterator, so you cannot call remove. Therefore, the for-each construct is not usable for filtering.
+
+* Iterate over multiple collections in parallel.
+
+The following method shows you how to use an Iterator to filter an arbitrary Collection — that is, traverse the collection removing specific elements.
+
+```
+static void filter(Collection<?> c) {
+    for (Iterator<?> it = c.iterator(); it.hasNext(); )
+        if (!cond(it.next()))
+            it.remove();
+}
+```
+
+This simple piece of code is polymorphic, which means that it works for any Collection regardless of implementation. This example demonstrates how easy it is to write a polymorphic algorithm using the Java Collections Framework.
+
+{{< /hint >}}
+
+***
+<hr style="border:1px solid gray"> </hr>
+
+#### Differences Between Aggregate Operations and Iterators
+
+Aggregate operations, like `forEach`, appear to be like iterators. However, they have several fundamental differences:
+
+1. **They use internal iteration**: Aggregate operations do not contain a method like next to instruct them to process the next element of the collection. With internal delegation, application determines what collection it iterates, but the JDK determines how to iterate the collection.
+
+2. **They process elements from a stream**: Aggregate operations process elements from a stream, not directly from a collection. Consequently, they are also called stream operations.
+
+3. **They support behavior as parameters**: You can specify lambda expressions as parameters for most aggregate operations. This enables you to customize the behavior of a particular aggregate operation.
+
+***
+<hr style="border:1px solid gray"> </hr>
+
+## Bulk Operations
+
+* Bulk operations perform an operation on an entire Collection.
+* The following are the bulk operations:
+
+    `containsAll` — returns true if the target Collection contains all of the elements in the specified Collection.
+
+    `addAll` — adds all of the elements in the specified Collection to the target Collection.
+
+    `removeAll` — removes from the target Collection all of its elements that are also contained in the specified Collection.
+
+    `retainAll` — removes from the target Collection all its elements that are not also contained in the specified Collection. That is, it retains only those elements in the target Collection that are also contained in the specified Collection.
+
+    `clear` — removes all elements from the Collection.
+
+{{< hint info >}}
+
+The `addAll`, `removeAll`, and `retainAll` methods all return true if the target Collection was modified in the process of executing the operation.
+
+{{< /hint >}}
+
+*****
+<hr style="border:1px solid gray"> </hr>
+
+## Array Operations
+
+* The `toArray` methods are provided as a bridge between collections and older APIs that expect arrays on input. The array operations allow the contents of a Collection to be translated into an array. The simple form with no arguments creates a new array of Object.
+
+*****
+
+## Some common running times
+
+| Time       | Common name | Effect on the running time if N is doubled | Example algorithms                               |
+| ---------- | ----------- | ------------------------------------------ | ------------------------------------------------ |
+| O(1)       | Constant    | Unchanged                                  | Insertion into a hash table (Implementing Set)   |
+| O(log N)   | Logarithmic | Increased by a constant amount             | Insertion into a tree (TreeSet)                  |
+| O(N)       | Linear      | Doubled                                    | Linear search                                    |
+| O(N log N) |             | Doubled plus an amount proportional to N   | Merge sort (Changing the Order of List Elements) |
+| O(N2)      | Quadratic   | Increased fourfold                         | Bubble sort                                      |
+
+<hr style="border:1px solid gray"> </hr>
+
+## Concurrent Collections: Java 5 and Beyond
+
+**Java 5** introduced **thread-safe concurrent collections as part of a much larger set of concurrency utilities, including primitives—atomic variables and locks—which** give the Java programmer access to relatively recent hardware innovations for managing concurrent threads.
+
+* The concurrent collections **remove the necessity for client-side locking**,
+* external synchronization is not even possible with these collections, as there is no one object which when locked will block all methods.
+* **Where operations need to be atomic**—for example, inserting an element into a Map only if it is currently absent—the concurrent collections provide a method specified to perform atomically—in this case, `ConcurrentMap.putIfAbsent`.
+
+* If you need thread safety, **the concurrent collections generally provide much better performance than synchronized collections**.
+  * This is primarily because their throughput is not reduced by the need to serialize access, as is the case with the synchronized collections.
+  * Synchronized collections also suffer the overhead of managing locks, which can be high if there is much contention.
+  * These differences can lead to efficiency differences of two orders of magnitude for concurrent access by more than a few threads.
+
+## Thread Safety Mechanisms
+
+* The concurrent collections achieve thread-safety by several different mechanisms.
+  
+  1. **copy-on-write:**
+
+     Classes that use `copy-on-write` store their values in an internal array, which is effectively **immutable**; any change to the value of the collection results in a new array being created to represent the new values. Synchronization is used by these classes, though only briefly, during the creation of a new array; because read operations do not need to be synchronized, `copy-on-write` collections perform well in the situations for which they are designed—those in which reads greatly predominate over writes. `Copy-on-write` is used by the collection classes `CopyOnWriteArrayList` and `CopyOnWriteArraySet`.
+
+  2. **compare-and-swap (CAS):**
+
+      An algorithm based on **CAS** behaves differently:
+
+      * it makes a local copy of the variable and performs the calculation without getting exclusive access.
+      * Only when it is ready to update the variable does it call **CAS**, which in one atomic operation compares the variable’s value with its value at the start and, if they are the same, updates it with the new value.
+      * If they are not the same, the variable must have been modified by another thread; in this situation, the CAS thread can try the whole computation again using the new value, or give up, or—in some algorithms— continue, because the interference will have actually done its work for it.
+      * Collections using CAS include `ConcurrentLinkedQueue` and `ConcurrentSkipListMap`.
+
+  3. **java.util.concurrent.locks.Lock:**
+
+      * An interface introduced in Java 5 as a more flexible alternative to classical synchronization.
+      * A Lock has the same basic behavior as classical synchronization,
+      * but a thread can also acquire it under special conditions:
+  
+      > only if the lock is not currently held, or
+
+      > with a timeout, or
+
+      > if the thread is not interrupted.
+
+      * Unlike synchronized code, in which an object lock is held while a code block or a method is executed, **a Lock is held until its unlock method is called**. Some of the collection classes in this group make use of these facilities to divide the collection into parts that can be separately locked, giving improved concurrency. For example, `LinkedBlockingQueue` has separate locks for the head and tail ends of the queue, so that elements can be added and removed in parallel. Other collections using these locks include `ConcurrentHashMap` and most of the implementations of `BlockingQueue`.
+
+**Iterators:**
+
+* The mechanisms described above lead to iterator policies more suitable for concurrent use than fail-fast, which implicitly regards concurrent modification as a problem to be eliminated.
+
+* **Copy-on-write** collections have **snapshot iterators**. These collections are backed by arrays which, once created, are never changed; if a value in the collection needs to be changed, a new array is created. So an iterator can read the values in one of these arrays (but never modify them) without danger of them being changed by another thread.
+  >> **Snapshot iterators do not throw** `ConcurrentModificationException`.
+
+* **Collections which rely on CAS have weakly consistent iterators**, which reflect some but not necessarily all of the changes that have been made to their backing collection since they were created. For example, if elements in the collection have been modified or removed before the iterator reaches them, it definitely will reflect these changes, but no such guarantee is made for insertions.
+  >> **Weakly consistent iterators also do not throw** `ConcurrentModificationException`.
+
+* The third group **(lock)** described above also have **weakly consistent iterators**. In **Java 6** this includes `DelayQueue` and `PriorityBlockingQueue`, which in Java 5 had fail-fast iterators.
+
+<hr style="border:1px solid gray"> </hr>
+

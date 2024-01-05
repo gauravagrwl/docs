@@ -1,0 +1,240 @@
+= Overview of the List
+:navtitle: List
+:description: 
+
+{description}
+
+Skip to Content
+Search 50,000+ courses, events, titles, and more
+Search 50,000+ courses, events, titles, and more
+15. Lists
+2h 12m remaining
+Chapter 15. Lists
+Lists are probably the most widely used Java collections in practice. A list is a collection which—unlike a set—can contain duplicates, and which—unlike a queue—gives the user full visibility and control over the ordering of its elements. The corresponding Collections Framework interface is List (see Figure 15-1).
+
+In addition to the operations inherited from Collection, the List interface includes operations for the following:
+
+Positional Access Methods that access elements based on their numerical position in the list:
+
+void add(int index, E e)           // add element e at given index
+boolean addAll(int index, Collection<? extends E> c)
+                                   // add contents of c at given index
+E get(int index)                   // return element with given index
+E remove(int index)                // remove element with given index
+E set(int index, E e)              // replace element with given index by e
+List
+Figure 15-1. List
+Search Methods that search for a specified object in the list and return its numerical position. These methods return -1 if the object is not present:
+
+int indexOf(Object o)             // return index of first occurrence of o
+int lastIndexOf(Object o)         // return index of last occurrence of o
+Range-View A method that gets a view of a range of the list:
+
+List<E> subList(int fromIndex, int toIndex)
+                                   // return a view of a portion of the list
+The method subList works in a similar way to the subSet operations on SortedSet (see SortedSet and NavigableSet), but uses the position of elements in the list rather than their values: the returned list contains the list elements starting at fromIndex, up to but not including toIndex. The returned list has no separate existence—it is just a view of part of the list from which it was obtained, so changes in it are reflected in the original list. There is an important difference from subSet, though; changes you make to the sublist write through to the backing list, but the reverse is not always true. If elements have been inserted into or removed from the backing list by directly calling one of its “structure changing” methods (Using the Methods of Collection), any subsequent attempts to use the sublist will result in a ConcurrentModificationException.
+
+List Iteration Methods that return a ListIterator, which is an Iterator with extended semantics to take advantage of the list’s sequential nature:
+
+ListIterator<E> listIterator()     // return a ListIterator for this list,
+                                   // initially positioned at index 0
+ListIterator<E> listIterator(int indx)
+
+                                   // return a ListIterator for this list,
+                                   // initially positioned at index indx
+The methods added by ListIterator support traversing a list in reverse order, changing list elements or adding new ones, and getting the current position of the iterator. The current position of a ListIterator always lies between two elements, so in a list of length n, there are n+1 valid list iterator positions, from 0 (before the first element) to n (after the last one). The second overload of listIterator uses the supplied value to set the initial position of the listIterator to one of these positions (calling listIterator with no arguments is the same as supplying an argument of 0.)
+
+To the Iterator methods hasNext, next, and remove, ListIterator adds the following methods:
+
+public interface ListIterator<E> extends Iterator<E> {
+  void add(E e);          // insert the specified element into the list
+  boolean hasPrevious();  // return true if this list iterator has further
+                          // elements in the reverse direction
+  int nextIndex();        // return the index of the element that would be
+                          // returned by a subsequent call to next 
+ListIterator positions
+Figure 15-2. ListIterator positions
+  E previous();           // return the previous element in the list
+  int previousIndex();    // return the index of the element that would be
+                          // returned by a subsequent call to previous
+  void set(E e);          // replace the last element returned by next or
+                          // previous with the specified element
+}
+Figure 15-2 shows a list of three elements. Consider an iterator at position 2, either moved there from elsewhere or created there by a call to listIterator (2). The effect of most of the operations of this iterator is intuitive; add inserts an element at the current iterator position (between the elements at index 1 and 2), hasPrevious and hasNext return true, previous and next return the elements at indices 1 and 2 respectively, and previousIndex and nextIndex return those indices themselves. At the extreme positions of the list, 0 and 3 in the figure, previousIndex and nextIndex would return -1 and 3 (the size of the list) respectively, and previous or next, respectively, would throw NoSuchElementException.
+
+The operations set and remove work differently. Their effect depends not on the current position of the iterator, but on its “current element”, the one last traversed over using next or previous: set replaces the current element, and remove removes it. If there is no current element, either because the iterator has just been created, or because the current element has been removed, these methods will throw IllegalStateException.
+
+Using the Methods of List
+Let’s look at examples of the use of some of these methods in the to-do manager. In the last chapter we considered representing the organization of a single day’s tasks in a queue-based class with shutdown capabilities. One useful way of enlarging the scope of the application is to have a number of objects of this type, each one representing the tasks that are scheduled for a day in the future. We will store references to these objects in a List, which (to keep things simple and to avoid grappling with the distasteful details of java.util.Calendar) will be indexed on the number of days in the future that it represents. So the queue of tasks scheduled for today will be stored at element 0 of the list, the queue scheduled for tomorrow at element 1, and so on. Example 15-1 shows the scheduler.
+
+Example 15-1. A list-based task scheduler
+public class TaskScheduler {
+  private List<StoppableTaskQueue> schedule;
+  private final int FORWARD_PLANNING_DAYS = 365;
+
+  public TaskScheduler() {
+    List<StoppableTaskQueue> temp = new ArrayList<StoppableTaskQueue>();
+    for (int i = 0 ; i < FORWARD_PLANNING_DAYS ; i++) {
+      temp.add(new StoppableTaskQueue());
+    }
+    schedule = new CopyOnWriteArrayList<StoppableTaskQueue>(temp);   //1
+  }
+
+  public PriorityTask getTask() {
+    for (StoppableTaskQueue daysTaskQueue : schedule) {
+      PriorityTask topTask = daysTaskQueue.getTask();
+      if (topTask != null) return topTask;
+    }
+    return null;    // no outstanding tasks - at all!?
+  }
+
+  // at midnight, remove and shut down the queue for day 0, assign its tasks
+  // to the new day 0, and create a new day's queue at the planning horizon
+  public void rollOver() throws InterruptedException{
+    StoppableTaskQueue oldDay = schedule.remove(0);
+    Collection<PriorityTask> remainingTasks = oldDay.shutDown();
+    StoppableTaskQueue firstDay = schedule.get(0);
+    for (PriorityTask t : remainingTasks) {
+      firstDay.addTask(t);
+    }
+    StoppableTaskQueue lastDay = new StoppableTaskQueue();
+    schedule.add(lastDay);
+  }
+
+  public void addTask(PriorityTask task, int day) {
+    if (day < 0 || day >= FORWARD_PLANNING_DAYS)
+      throw new IllegalArgumentException("day out of range");
+    StoppableTaskQueue daysTaskQueue = schedule.get(day);
+    if (daysTaskQueue.addTask(task)) return;                        //2
+    // StoppableTaskQueue.addTask returns false only when called on
+    // a queue that has been shut down. In that case, it will also
+    // have been removed by now, so it's safe to try again.
+    if (! schedule.get(0).addTask(task)) {
+      throw new IllegalStateException("failed to add task " + task);
+   }
+  }
+}
+Although the example aims primarily to show the use of List interface methods rather than to explore any particular implementation, we can’t set it up without choosing one. Since a major factor in the choice will be the concurrency requirements of the application, we need to consider them now. They are quite straightforward: clients consuming or producing tasks only ever read the List representing the schedule, so (once it is constructed) the only occasion that it is ever written is at the end of a day. At that point the current day’s queue is removed from the schedule, and a new one is added at the end (the “planning horizon”, which we have set to a year in the example). We don’t need to exclude clients from using the current day’s queue before that happens, because the StoppableTaskQueue design of Example14.1 ensures that they will be able to complete in an orderly way once the queue is stopped. So the only exclusion required is to ensure that clients don’t try to read the schedule itself while the rollover procedure is changing its values.
+
+If you recall the discussion of CopyOnWriteArrayList in Concurrent Collections: Java 5 and Beyond, you may see that it fills these requirements very nicely. It optimizes read access, in line with one of our requirement. In the event of a write operation, it synchronizes just long enough to create a new copy of its internal backing array, thus filling our other requirement of preventing interference between read and write operations.
+
+With the implementation chosen, we can understand the constructor of Example15.1; writing to the list is expensive, so it is sensible to use a conversion constructor to set it up with a year’s worth of task queues in one operation (line //1).
+
+The getTask method is straightforward; we simply iterate over the task queues, starting with today’s queue, looking for a scheduled task. If the method finds no outstanding tasks, it returns null—and if finding a task-free day was noteworthy, how should we celebrate a task-free year?
+
+At midnight each day, the system will call the method rollOver, which implements the sad ritual of shutting down the old day’s task queue and transferring the remaining tasks in it to the new day. The sequence of events here is important; rollOver first removes the queue from the list, at which time producers and consumers may still be about to insert or remove elements. It then calls the StoppableTaskQueue.shutDown which, as we saw in Example 14-1 returns the remaining tasks in the queue and guarantees that no more will be added. Depending on how far they have progressed, calls of addTask will either complete or will return false, indicating that they failed because the queue was shut down.
+
+This motivates the logic of addTask: the only situation in which the addTask method of StoppableTaskQueue can return false is that in which the queue being called is already stopped. Since the only queue that is stopped is the day 0 queue, a return value of false from addTask must result from a producer thread getting a reference to this queue just before a midnight rollover. In that case, the current value of element 0 of the list is by now the new day 0, and it is safe to try again. If the second attempt fails, the thread has been suspended for 24 hours!
+
+Notice that the rollOver method is quite expensive; it writes to the schedule twice, and since the schedule is represented by a CopyOnWriteArrayList (see CopyOnWriteArrayList), each write causes the entire backing array to be copied. The argument in favour of this implementation choice is that rollOver is very rarely invoked compared to the number of calls made on getTask, which iterates over the schedule. The alternative to CopyOnWriteArrayList would be a BlockingQueue implementation, but the improvement that would provide in the rarely-used rollOver method would come at the cost of slowing down the frequently-used getTask method, since queue iterators are not intended to be used in performance-critical situations.
+
+Using Range-View and Iterator Methods Of the four List method groups above, Example 15-1 makes use of the methods of one group, positional access, in several places. To see how range-view and iterator methods could also be useful, consider how the TaskScheduler could export its schedule, or a part of it, for a client to modify. You would want the client to be able to view this subschedule and perhaps to insert or remove tasks, but you would definitely want to forbid the insertion or removal of elements of the list itself, since these represent the sequence of days for which tasks are being scheduled. The standard way to achieve this would be by means of an unmodifiable list, as provided by the Collections class (see Unmodifiable Collections). An alternative in this case would be to return a list iterator, as the snapshot iterators for copy-on-write collections do not support modification of the backing collection. So we could define a method to provide clients with a “planning window”:
+
+listIterator<StoppableTaskQueue> getSubSchedule(int startDay, int endDay) {
+  return schedule.subList(startDay, endDay).listIterator();
+}
+This view will be fine for today, but we have to remember to discard it at midnight, when the structural changes of removing and adding entries will invalidate it.
+
+Implementing List
+There are three concrete implementations of List in the Collections Framework (see Figure 15-3), differing in how fast they perform the various operations defined by the interface and how they behave in the face of concurrent modification; unlike Set and Queue, however, List has no subinterfaces to specify differences in functional behavior. In this and the following section we look at each implementation in turn and provide a performance comparison.
+
+ArrayList
+Arrays are provided as part of the Java language and have a very convenient syntax, but their key disadvantage—that, once created, they cannot be resized—makes them increasingly less popular than List implementations, which (if resizable at all) are indefinitely extensible. The most commonly used implementation of List is, in fact, ArrayList—that is, a List backed by an array.
+
+The standard implementation of ArrayList stores the List elements in contiguous array locations, with the first element always stored at index 0 in the array. It requires an array at least large enough (with sufficient capacity) to contain the elements, together with a way of keeping track of the number of “occupied” locations (the size of the List). If an ArrayList has grown to the point where its size is equal to its capacity, attempting to add another element will require it to replace the backing array with a larger one capable of holding the old contents and the new element, and with a margin for further expansion (the standard implementation actually uses a new array that is double the length of the old one). As we explained in Efficiency and the O-Notation, this leads to an amortized cost of O(1).
+
+Implementations of the List interface
+Figure 15-3. Implementations of the List interface
+The performance of ArrayList reflects array performance for "random-access” operations: set and get take constant time. The downside of an array implementation is in inserting or removing elements at arbitrary positions, because that may require adjusting the position of other elements. (We have already met this problem with the remove method of the iterators of array-based queues—for example, ArrayBlockingQueue (see Implementing BlockingQueue). But the performance of positional add and remove methods are much more important for lists than iterator.remove is for queues.)
+
+For example, Figure 15-4(a) shows a new ArrayList after three elements have been added by means of the following statements:
+
+List<Character>; charList = new ArrayList<Character>();
+Collections.addAll(charList,  'a', 'b', 'c');
+If we now want to remove the element at index 1 of an array, the implementation must preserve the order of the remaining elements and ensure that the occupied region of the array is still to start at index 0. So the element at index 2 must be moved to index 1, that at index 3 to index 2, and so on. Figure 15-4(b) shows our sample ArrayList after this operation has been carried out. Since every element must be moved in turn, the time complexity of this operation is proportional to the size of the list (even though, because this operation can usually be implemented in hardware, the constant factor is low).
+
+Removing an element from an ArrayList
+Figure 15-4. Removing an element from an ArrayList
+Even so, the alert reader, recalling the discussion of the circular arrays used to implement ArrayBlockingQueue and ArrayDeque (see Implementing Deque) may wonder why a circular array was not chosen for the implementation of ArrayList, too. It is true that the add and remove methods of a circular array show much better performance only when they are called with an index argument of 0, but this is such a common case and the overhead of using a circular array is so small, that the question remains.
+
+Indeed, an outline implementation of a circular array list was presented by Heinz Kabutz in The Java Specialists’ Newsletter (http://www.javaspecialists.co.za/archive/Issue027.html). In principle it is still possible that ArrayList may be reimplemented in this way, possibly leading to real performance gains in many existing Java applications. A possible alternative is that the circular ArrayDeque may be retrofitted to implement the methods of List. In the meantime, if your application is using a List in which the performance of element insertion and removal from the beginning of a list is more important than that of randomaccess operations, consider writing to the Deque interface and taking advantage of its very efficient ArrayDeque implementation.
+
+As we mentioned in the discussion of ArrayBlockingQueue (Implementing Queue), variable-size array-backed collection classes can have one configuration parameter: the initial length of the array. So besides the standard Collections Framework constructors, ArrayList has one that allows you to choose the value of the initial capacity to be large enough to accommodate the elements of the collection without frequent create-copy operations. The initial capacity of an ArrayList created by the default constructor is 10, and that of one initialized with the elements of another collection is 110% of the size of that collection.
+
+The iterators of ArrayList are fail-fast.
+
+LinkedList
+We discussed LinkedList as a Deque implementation in Implementing Deque. You will avoid it as a List implementation if your application makes much use of random access; since the list must iterate internally to reach the required position, positional add and remove have linear time complexity, on average. Where LinkedList does have a performance advantage over ArrayList is in adding and removing elements anywhere other than at the end of the list; for LinkedList this takes constant time, against the linear time required for noncircular array implementations.
+
+CopyOnWriteArrayList
+In Implementing Set we met CopyOnWriteArraySet, a set implementation designed to provide thread safety together with very fast read access. CopyOnWriteArrayList is a List implementation with the same design aims. This combination of thread safety with fast read access is useful in some concurrent programs, especially when a collection of observer objects needs to receive frequent event notifications. The cost is that the array which backs the collection has to be treated as immutable, so a new copy is created whenever any changes are made to the collection. This cost may not be too high to pay if changes in the set of observers occur only rarely.
+
+The class CopyOnWriteArraySet in fact delegates all of its operations to an instance of CopyOnWriteArrayList, taking advantage of the atomic operations addIfAbsent and addAllAbsent provided by the latter to enable the Set methods add and addAll to avoid introducing duplicates to the set. In addition to the two standard constructors (see Collection Constructors), CopyOnWriteArrayList has an extra one that allows it to be created using the elements of a supplied array as its initial contents. Its iterators are snapshot iterators, reflecting the state of the list at the time of their creation.
+
+Comparing List Implementations
+Table 15-1 gives the comparative performance for some sample operations on List classes. Even though the choice here is much narrower than with queues or even sets, the same process of elimination can be used. As with queues, the first question to ask is whether your application requires thread safety. If so, you should use CopyOnWriteArrayList, if you can—that is, if writes to the list will be relatively infrequent. If not, you will have to use a synchronized wrapper (see Synchronized Collections) around ArrayList or LinkedList.
+
+For most list applications the choice is between ArrayList and LinkedList, synchronized or not. Once again, your decision will depend on how the list is used in practice. If set and get predominate, or element insertion and removal is mainly at the end of the list, then ArrayList will be the best choice. If, instead, your application needs to frequently insert and remove elements near the start of the list as part of a process that uses iteration, LinkedList may be better. If you are in doubt, test the performance with each implementation. A Java 6 alternative for single-threaded code that may be worth considering in the last case—if the insertions and removals are actually at the start of the list—is to write to the Deque interface, taking advantage of its very efficient ArrayDeque implementation. For relatively infrequent random access, use an iterator, or copy the ArrayDeque elements into an array using toArray.
+
+Table 15-1. Comparative performance of different list implementations
+ 	
+get
+
+add
+
+contains
+
+next
+
+remove(0)
+
+iterator.remove
+
+ArrayList
+
+O(1)
+
+O(1)
+
+O(n)
+
+O(1)
+
+O(n)
+
+O(n)
+
+LinkedList
+
+O(n)
+
+O(1)
+
+O(n)
+
+O(1)
+
+O(1)
+
+O(1)
+
+CopyOnWrite-ArrayList
+
+O(1)
+
+O(n)
+
+O(n)
+
+O(1)
+
+O(n)
+
+O(n)
+
+It is possible that, in a future release, ArrayDeque will be retrofitted to implement the List interface; if that happens, it will become the implementation of choice for both Queue and List in single-threaded environments.
+
+table of contents
+search
+Settings
+queue

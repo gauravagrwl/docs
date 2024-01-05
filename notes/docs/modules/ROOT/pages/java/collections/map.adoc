@@ -1,0 +1,422 @@
+= Overview of the Map
+:navtitle: Map
+:description: 
+
+{description}
+
+Skip to Content
+Search 50,000+ courses, events, titles, and more
+Search 50,000+ courses, events, titles, and more
+16. Maps
+2h 12m remaining
+Chapter 16. Maps
+The Map interface is the last of the major Collections Framework interfaces, and the only one that does not inherit from Collection. It defines the operations that are supported by a set of key-to-value associations in which the keys are unique. These operations are shown in Figure 16-1 and fall into the following four groups, broadly parallel to the four operation groups of Collection—adding elements, removing elements, querying collection contents, and providing different views of the contents of a collection.
+
+Adding Associations
+
+V put(K key, V value)            // add or replace a key-value association
+                                 // return the old value (may be null) if the
+                                 // key was present; otherwise returns null
+void putAll(Map<? extends K,? extends V> m)
+                                 // add each of the key-value associations in
+                                 // the supplied map into the receiver
+Map
+Figure 16-1. Map
+The operations in this group are optional; calling them on an unmodifiable map will result in an UnsupportedOperationException.
+
+Removing Associations
+
+void clear()               // remove all associations from this map
+V remove(Object key)       // remove the association, if any, with the
+                           // given key; returns the value with which it
+                           // was associated, or null
+The signature of Map.remove is like that of the Collection.remove (see Using the Methods of Collection) in that it takes a parameter of type Object rather than the generic type. We discussed alternatives to this design in Wildcards Versus Type Parameters.
+
+Like the addition operations of the previous group, these removal operations are optional.
+
+Querying the Contents of a Map
+
+V get(Object k)                 // return the value corresponding to k, or
+                                // null if k is not present as a key
+boolean containsKey(Object k)   // return true if k is present as a key
+boolean containsValue(Object v) // return true if v is present as a value
+int size()                      // return the number of associations
+boolean isEmpty()               // return true if there are no associations
+The arguments to containsKey and containsValue may be null for Map implementations that allow null keys or values (respectively). An implementation that does not allow nulls will throw NullPointerException if supplied with a null argument to these methods.
+
+As with the size method of Collection, the largest element count that can be reported is Integer.MAX_VALUE.
+
+Providing Collection Views of the Keys, Values, or Associations:
+
+Set<Map.Entry<K, V>> entrySet() // return a Set view of the associations
+Set<K> keySet()                 // return a Set view of the keys
+Collection<V> values()          // return a Collection view of the values
+The collections returned by these methods are backed by the map, so any changes to them are reflected in the map itself, and vice versa. In fact, only limited changes can be made via the view: elements can be removed, either directly or via an iterator over the view, but cannot be added; you will get an UnsupportedOperationException if you try. Removing a key removes the single corresponding key-value association; removing a value, on the other hand, removes only one of the associations mapping to it; the value may still be present as part of an association with a different key. An iterator over the view will become undefined if the backing map is concurrently modified.
+
+The members of the set returned by entrySet implement the interface Map.Entry, which represents a key-value association and provides a setValue method which can be used to change values in the backing map. The documentation for Map.Entry is unusually specific in specifying that objects implementing the interface can only be created during iteration of the view resulting from a call of entrySet, and that such objects become invalid if the backing map is modified during this iteration. In Java 6 this restricted scenario for the creation of Map.Entry objects is insufficient, as it is the return type for a number of methods of NavigableMap (see SortedMap and NavigableMap).
+
+Using the Methods of Map
+One problem with basing the to-do manager on priority queues, as we have done in the last two chapters, is that priority queues are unable to preserve the order in which elements are added to them (unless that can be incorporated in the priority ordering, for example as a timestamp or sequence number). To avoid this, we could use as an alternative model a series of FIFO queues, each one assigned to a single priority. A Map would be suitable for holding the association between priorities and task queues; EnumMap in particular is a highly efficient Map implementation specialized for use with keys which are members of an enum.
+
+This model will rely on a Queue implementation that maintains FIFO ordering. To focus on the use of the Map methods, let’s assume a single-threaded client and use a series of ArrayDeques as the implementation:
+
+Map<Priority,ArrayDeque<Task>> taskMap =
+  new EnumMap<Priority,ArrayDeque<Task>>(Priority.class);
+for (Priority p : Priority.values()) {
+  taskMap.put(p, new ArrayDeque<Task>());
+}
+// populate the lists, for example:
+taskMap.get(Priority.MEDIUM).add(mikePhone);
+taskMap.get(Priority.HIGH).add(databaseCode);
+Now, to get to one of the task queues—say, the one with the highest-priority tasks—we can write:
+
+Queue<Task> highPriorityTaskList = taskMap.get(Priority.HIGH);
+Polling this queue will now give us the high priority to-dos, in the order in which they were entered into the system.
+
+To see the use of some of the other methods of Map, let’s extend the example a little to allow for the possibility that some of these tasks might actually earn us some money by being billable. One way of representing this would be by defining a class Client:
+
+class Client {...}
+Client acme = new Client("Acme Corp.",...);
+and creating a mapping from tasks to clients:
+
+Map<Task,Client> billingMap = new HashMap<Task,Client>();
+billingMap.put(interfaceCode, acme);
+We need to ensure that the system can still handle nonbillable tasks.We have a choice here: we can either simply not add the name of a nonbillable task into the billingMap, or we can map it to null. In either case, as part of the code for processing a task t, we can write:
+
+Task t = ...
+Client client = billingMap.get(t);
+if (client != null) {
+  client.bill(t);
+}
+When we have finally finished all the work we were contracted to do by our client Acme Corp., the map entries that associate tasks with Acme can be removed:
+
+Collection<Client> clients = billingMap.values();
+for (Iterator<Client> iter = clients.iterator() ; iter.hasNext() ; ) {
+  if (iter.next().equals(acme)) {
+    iter.remove();
+  }
+}
+A neater alternative takes advantage of the method Collections.singleton (see Collection Factories), a factory method which returns an immutable Set containing only the specified element:
+
+clients.removeAll(Collections.singleton(acme));
+Both ways cost O(n), with similar constant factors in Sun’s current implementation.
+
+Implementing Map
+The implementations, eight in all, that the Collections Framework provides for Map are shown in Figure 16-2. We shall discuss HashMap, LinkedHashMap, WeakHashMap, IdentityHashMap, and EnumMap here; the interfaces NavigableMap, ConcurrentMap, and ConcurrentNavigableMap are discussed, along with their implementations, in the sections following this one.
+
+For constructors, the general rule for Map implementations is like that for Collection implementations (see Collection Constructors). Every implementation excluding EnumMap has at least two constructors; taking HashMap as an example, they are:
+
+public HashMap()
+public HashMap(Map<? extends K,? extends V> m)
+The first of these creates an empty map, and the second a map that will contain the key-value mappings contained in the supplied map m. The keys and values of map m must have types that are the same as (or are subtypes of) the keys and values, respectively, of the map being created. Using this second constructor has the same effect as creating an empty map with the default constructor, and then adding the contents of map m using putAll. In addition to these two, the standard implementations have other constructors for configuration purposes.
+
+The structure of Map implementations in the Collections Framework
+Figure 16-2. The structure of Map implementations in the Collections Framework
+HashMap
+In discussing HashSet in HashSet, we mentioned that it delegates all its operations to a private instance of HashMap. Figure 16-3(a) is similar to Figure 13-2, but without the simplification that removed the value elements from the map (all elements in a HashSet are stored as keys with the same constant value). The discussion in Implementing Set of hash tables and their performance applies equally to HashMap. In particular, HashMap provides constant-time performance for put and get. Although in principle constant-time performance is only attainable with no collisions, it can be closely approached by the use of rehashing to control the load and thereby to minimize the number of collisions.
+
+Iteration over a collection of keys or values requires time proportional to the capacity of the map plus the number of key-value mappings that it contains. The iterators are fail-fast.
+
+Two constructors allow the programmer to configure a new instance of HashMap:
+
+public HashMap(int initialCapacity)
+public HashMap(int initialCapacity, float loadFactor)
+These constructors are like those of HashSet, allowing specification of the initial capacity and, optionally, the load factor at which the table will be rehashed.
+
+LinkedHashMap
+Like LinkedHashSet (LinkedHashSet), the class LinkedHashMap refines the contract of its parent class, HashMap, by guaranteeing the order in which iterators return its elements. Unlike LinkedHashSet, however, LinkedHashMap offers a choice of iteration orders; elements can be returned either in the order in which they were inserted in the map, or in the order in which they were accessed (from least-recently to most-recently accessed). An accessordered LinkedHashMap is created by supplying an argument of true for the last parameter of the constructor:
+
+HashMap and WeakHashMap
+Figure 16-3. HashMap and WeakHashMap
+public LinkedHashMap(int initialCapacity,
+                     float loadFactor,
+                     boolean accessOrder)
+Supplying false will give an insertion-ordered map. The other constructors, which are just like those of HashMap, also produce insertion-ordered maps. As with LinkedHashSet, iteration over a LinkedHashMap takes time proportional only to the number of elements in the map, not its capacity.
+
+Access-ordered maps are especially useful for constructing Least Recently Used (LRU) caches. A cache is an area of memory that stores frequently accessed data for fast access. In designing a cache, the key issue is the choice of algorithm that will be used to decide what data to remove in order to conserve memory. When an item from a cached data set needs to be found, the cache will be searched first. Typically, if the item is not found in the cache, it will be retrieved from the main store and added to the cache. But the cache cannot be allowed to continue growing indefinitely, so a strategy must be chosen for removing the least useful item from the cache when a new one is added. If the strategy chosen is LRU, the entry removed will be the one least recently used. This simple strategy is suitable for situations in which an access of an element increases the probability of further access in the near future of the same element. Its simplicity and speed have made it the most popular caching strategy.
+
+Cache construction with LinkedHashMap is further aided by removeEldestEntry, the single method that it adds to those inherited from HashMap:
+
+protected boolean removeEldestEntry(Map.Entry<K,V> eldest)
+The contract for removeEldestEntry states that the methods put and putAll will call removeEldestEntry whenever a new entry is added to the map, passing to it the “eldest” entry. In an insertion-ordered map, the eldest entry will be the one that was least recently added to the map, but in an access-ordered map it is the one least recently accessed (and if some entries have never been accessed, it is the one amongst these which was least recently added). In LinkedHashMap itself, removeEldestEntry does nothing and returns false, but subclasses can override it to return true under some circumstances. The contract for this method specifies that although it may itself remove the eldest entry, it must return false if it has done so, since it is expected that a return value of true will cause its calling method to do the removal. A simple example of removeEldestEntry would allow a map to grow to a given maximum size and then maintain that size by deleting the eldest entry each time a new one is added:
+
+class BoundedSizeMap extends LinkedHashMap {
+  private int maxEntries;
+  public BoundedSizeMap(int maxEntries) {
+    super(16, 0.75f, true);
+    this.maxEntries = maxEntries;
+  }
+  protected boolean removeEldestEntry(Map.Entry eldest) {
+    return size() > maxEntries;
+  }
+}
+A refinement of this simple example could take into account the entry supplied as the argument to removeEldestEntry. For example, a directory cache might have a set of reserved names which should never be removed, even if the cache continues to grow as a result.
+
+Notice that an insertion-ordered LinkedHashMap that overrides removeEldestEntry as shown above will implement a FIFO strategy. FIFO caching has often been used in preference to LRU because it is much simpler to implement in maps that do not offer access ordering. However LRU is usually more effective than FIFO, because the reduced cost of cache refreshes outweighs the overhead of maintaining access ordering.
+
+Iteration over a collection of keys or values returned by a LinkedHashMap is linear in the number of elements. The iterators over such collections are fail-fast.
+
+WeakHashMap
+An ordinary Map keeps ordinary (“strong”) references to all the objects it contains. That means that even when a key has become unreachable by any means other than through the map itself, it cannot be garbage collected. Often, that’s exactly what we want; in the example at the beginning of this chapter, where we mapped tasks to clients, we wouldn’t have wanted a mapping to disappear just because we weren’t holding a reference to the task object that we had put into the HashMap. To look up the value associated with a supplied key, the HashMap will look for a key that matches (in the sense of equals) the supplied one—they don’t have to be physically the same object.
+
+But suppose that the objects of the key class are unique—that is, object equality is the same as object identity. For example, each object might contain a unique serial number. In this case, once we no longer have a reference—from outside the map—to an object being used as a key, we can never look it up again, because we can never re-create it. So the map might as well get rid of the key-value pair and, in fact, there may be a strong advantage in doing so if the map is large and memory is in short supply. That is the idea that WeakHashMap implements.
+
+Internally WeakHashMap holds references to its key objects through references of the class java.lang.ref.WeakReference (see Figure 16-3(b)). A WeakReference introduces an extra level of indirection in reaching an object. For example, to make a weak reference to to the string "code gui" you would write:
+
+WeakReference<String> wref = new WeakReference<String>("code gui");
+And at a later time you would recover a strong reference to it using the get method of WeakReference:
+
+String recoveredStringRef = wref.get();
+If there are no strong references to the string "code gui" (or to any substring of it returned from its subString method), the existence of the weak reference will not by itself prevent the garbage collector from reclaiming the object. So the recovered reference value recoveredStringRef may, or may not, be null.
+
+To see how WeakHashMap can be useful, think of a tracing garbage collector that works by determining which objects are reachable, and reclaiming all others. The starting points for a reachability search include the static variables of currently loaded classes and the local variables currently in scope. Only strong references are followed to determine reachability, so the keys of a WeakHashMap will be available to be reclaimed if they are not reachable by any other route. Note that a key cannot be reclaimed if it is strongly referenced from the corresponding value. (including from the values they correspond to).
+
+Before most operations on a WeakHashMap are executed, the map checks which keys have been reclaimed. (It’s not enough to check if a key is null, because null is a legal value for keys in a WeakHashMap. The WeakReference mechanism allows you to tell the garbage collector to leave information in a ReferenceQueue each time it reclaims a weakly referenced object.) The WeakHashMap then removes every entry of which the garbage collector has reclaimed the key.
+
+What is a WeakHashMap good for? Imagine you have a program that allocates some transient system resource—a buffer, for example—on request from a client. Besides passing a reference to the resource back to the client, your program might also need to store information about it locally—for example, associating the buffer with the client that requested it. That could be implemented by means of a map from resource to client objects. But now, even after the client has disposed of the resource, the map will still hold a reference that will prevent the resource object from being garbage collected—if, that is, the reference is strong. Memory will gradually be used up by resources which are no longer in use. But if the reference is weak, held by a WeakHashMap, the garbage collector will be able to reclaim the object after the last strong reference has gone away, and the memory leak is prevented.
+
+A more general use is in those applications—for example, caches—where you don’t mind information disappearing if memory is low. Here, WeakHashMap is useful whether or not the keys are unique, because you can always re-create a key if necessary to see if the corresponding value is still in the cache. WeakHashMap isn’t perfect for this purpose; one of its drawbacks is that it weakly references the map’s keys rather than its values, which usually occupy much more memory. So even after the garbage collector has reclaimed a key, the real benefit in terms of available memory will not be experienced until the map has removed the stale entry. A second drawback is that weak references are too weak; the garbage collector is liable to reclaim a weakly reachable object at any time, and the programmer cannot influence this in any way. (A sister class of WeakReference, java.lang.ref.SoftReference, is treated differently: the garbage collector should postpone reclaiming these until it is under severe memory pressure. Heinz Kabutz has written a SoftReference-based map using generics; see http://www.javaspecialists.co.za/archive/Issue098.html.)
+
+WeakHashMap performs similarly to HashMap, though more slowly because of the overheads of the extra level of indirection for keys. The cost of clearing out unwanted key-value associations before each operation is proportional to the number of associations that need to be removed. The iterators over collections of keys and values returned by WeakHashMap are fail-fast.
+
+IdentityHashMap
+An IdentityHashMap differs from an ordinary HashMap in that two keys are considered equal only if they are physically the same object: identity, rather than equals, is used for key comparison. That sets the contract for IdentityHashMap at odds with the contract for Map, the interface it implements, which specifies that equality should be used for key comparison. An alternative design could have avoided this problem by providing a weaker contract for Map, with two different subinterfaces strengthening the contract to specify the type of key comparison to use. This is another example of the problem we discussed in Contracts, of balancing the tradeoff between a framework’s complexity and its precision in implementing its contracts.
+
+IdentityHashMap is a specialized class, commonly used in operations such as serialization, in which a graph has to be traversed and information stored about each node. The algorithm used for traversing the graph must be able to check, for each node it encounters, whether that node has already been seen; otherwise, graph cycles could be followed indefinitely. For cyclic graphs, we must use identity rather than equality to check whether nodes are the same. Calculating equality between two graph node objects requires calculating the equality of their fields, which in turn means computing all their successors—and we are back to the original problem. An IdentityHashMap, by contrast, will report a node as being present only if that same node has previously been put into the map.
+
+Resolving collisions by linear probing
+Figure 16-4. Resolving collisions by linear probing
+The standard implementation of IdentityHashMap handles collisions differently than the chaining method shown in Figure 13-2 and used by all the other variants of HashSet and HashMap. This implementation uses a technique called linear probing, in which the key and value references are stored directly in adjacent locations in the table itself rather than in cells referenced from it. With linear probing, collisions are handled by simply stepping along the table until the first free pair of locations is found. Figure 16-4 shows three stages in filling an IdentityHashMap with a capacity of 8. In (a) we are storing a key-value pair whose key hashes to 0, and in (b) a pair whose key hashes to 4. The third key, added in (c), also hashes to 4, so the algorithm steps along the table until it finds an unused location. In this case, the first one it tries, with index 6, is free and can be used. Deletions are trickier than with chaining; if key2 and value2 were removed from the table in Figure 13-2, key3 and value3 would have to be moved along to take their place.
+
+Out of all the Collections Framework hash implementations, why does IdentityHashMap alone use linear probing when all the others use chaining? The motivation for using probing is that it is somewhat faster than following a linked list, but that is only true when a reference to the value can be placed directly in the array, as in Figure 16-4. That isn’t practical for all other hash-based collections, because they store the hash code as well as the value. This is for reasons of efficiency: a get operation must check whether it has found the right key, and since equality is an expensive operation, it makes sense to check first whether it even has the right hash code. Of course, this reasoning doesn’t apply to IdentityHashMap, which checks object identity rather than object equality.
+
+There are three constructors for IdentityHashMap:
+
+public IdentityHashMap()
+public IdentityHashMap(Map<? extends K,? extends V> m)
+public IdentityHashMap(int expectedMaxSize)
+The first two are the standard constructors found in every general-purpose Map implementation. The third takes the place of the two constructors that in other HashMaps allow the user to control the initial capacity of the table and the load factor at which it will be rehashed. IdentityHashMap doesn’t allow this, fixing it instead (at .67 in the standard implementation) in order to protect the user from the consequences of setting the load factor inappropriately: whereas the cost of finding a key in a table using chaining is proportional to the load factor l, in a table using linear probing it is proportional to 1/(1–l). So avoiding high load factors is too important to be left to the programmer! This decision is in line with the policy, mentioned earlier, of no longer providing configuration parameters when new classes are introduced into the Framework.
+
+EnumMap
+Implementing a mapping from an enumerated type is straightforward and very efficient, for reasons similar to those described for EnumSet (see EnumSet); in an array implementation, the ordinal value of each enumerated type constant can serve as the index of the corresponding value. The basic operations of get and put can be implemented as array accesses, in constant time. An iterator over the key set takes time proportional to the number of constants in the enumerated type and returns the keys in their natural order (the order in which the enum constants are declared). Although, as with EnumSet, this class is not thread-safe, the iterators over its collection views are not fail-fast but weakly consistent.
+
+EnumMap has three public constructors:
+
+EnumMap(Class<K> keyType)          // create an empty enum map
+EnumMap(EnumMap<K, ? extends V> m) // create an enum map, with the same
+                                   // key type and elements as m
+EnumMap(Map<K, ? extends V> m)     // create an enum map using the elements
+                                   // of the supplied Map, which (unless it
+                                   // is an EnumMap) must contain at least
+                                   // one association
+An EnumMap contains a reified key type, which is used at run time for checking the validity of new entries being added to the map. This type is supplied by the three constructors in different ways. In the first, it is supplied as a class token; in the second, it is copied from the specified EnumMap. In the third, there are two possibilities: either the specified Map is actually an EnumMap, in which case it behaves like the second constructor, or the class of the first key of the specified Map is used (which is why the supplied Map may not be empty).
+
+SortedMap and NavigableMap
+Like SortedSet, the subinterface SortedMap (see Figure 16-5) adds to its contract a guarantee that its iterators will traverse the map in ascending key order. Its definition is similar to that of SortedSet, with methods such as firstKey and headMap corresponding to the SortedSet methods first and headSet. Also like SortedSet, the SortedMap interface has been extended in Java 6 by the subinterface NavigableMap (see Figure 16-6). This section is structured like SortedSet and NavigableSet for the same reasons: SortedMap has been made obsolete by NavigableMap, but it may be helpful for developers prevented for the moment from using Java 6 to have the two interfaces treated separately.
+
+SortedMap
+Figure 16-5. SortedMap
+A SortedMap imposes an ordering on its keys, either that of their natural ordering or of a Comparator; but in either case the compare method must be consistent with equals, as the SortedMap will use compare to determine when a key is already in the map.
+
+The extra methods defined by the SortedMap interface fall into three groups:
+
+Getting the First and Last Elements
+
+K firstKey()
+K lastKey()
+If the set is empty, these operations throw a NoSuchElementException.
+
+Retrieving the Comparator
+
+Comparator<? super K> comparator()
+This method returns the map’s key comparator if it has been given one, instead of relying on the natural ordering of the keys. Otherwise, it returns null.
+
+Finding Subsequences
+
+SortedMap<K,V> subMap(K fromKey, K toKey)
+SortedMap<K,V> headMap(K toKey)
+SortedMap<K,V> tailMap(K fromKey)
+These operations work like the corresponding operations in SortedSet: the key arguments do not themselves have to be present in the map, and the sets returned include the fromKey— if, in fact, it is present in the map—and do not include the toKey.
+
+NavigableMap
+Figure 16-6. NavigableMap
+NavigableMap
+NavigableMap (see Figure 16-6) extends and replaces SortedMap, in the same way as NavigableSet replaces SortedSet. Its methods correspond almost exactly to those of NavigableSet, regarding the map as a set of key-value associations represented by Map.Entry objects. So where a NavigableSet method returns an element of the set, the corresponding NavigableMap method return a result of type Map.Entry. Until now, objects of this type were only obtainable by iterating over the set returned by Map.entrySet, and were specified to become invalid in the face of concurrent modification of the map. This specification is not appropriate to Map.Entry objects returned by the new methods, and the contract for NavigableMap acknowledges this by specifying that the Map.Entry objects returned by its methods are snapshot objects reflecting the state of the map at the time they were produced, and do not support setValue.
+
+The methods added by NavigableMap can be divided into four groups.
+
+Getting the First and Last Elements
+
+Map.Entry<K,V> pollFirstEntry()
+Map.Entry<K,V> pollLastEntry()
+Map.Entry<K,V> firstEntry()
+Map.Entry<K,V> lastEntry()
+The first two methods are analogous to pollFirst and pollLast in NavigableSet. The last two were introduced because the emphasis in NavigableMap on making map entries available requires entry-returning methods corresponding to the key-returning methods first and last inherited from SortedMap.
+
+Getting Range Views
+
+NavigableMap<K,V> subMap(
+            K fromKey, boolean fromInclusive, K toKey, boolean toInclusive)
+NavigableMap<K,V> headMap(K toKey, boolean inclusive)
+NavigableMap<K,V> tailMap(K fromKey, boolean inclusive)
+Like the NavigableSet methods, these provide more flexibility than the range-view methods of SortedMap. Instead of always returning a half-open interval, these methods accept boolean parameters that are used to determine whether to include the key or keys defining the interval.
+
+Getting Closest Matches
+
+Map.Entry<K,V> ceilingEntry(K Key)
+K ceilingKey(K Key)
+Map.Entry<K,V> floorEntry(K Key)
+K floorKey(K Key)
+Map.Entry<K,V> higherEntry(K Key)
+K higherKey(K Key)
+Map.Entry<K,V> lowerEntry(K Key)
+K lowerKey(K Key)
+These are similar to the corresponding closest-match methods of NavigableSet, but they return Map.Entry objects. If you want the key belonging to one of these entries, use the corresponding convenience key-returning method, with the performance benefit of allowing the map to avoid the unnecessary creation of a Map.Entry object.
+
+Navigating the Map
+
+NavigableMap<K,V> descendingMap()  // return a reverse-order view of the map
+NavigableSet<K> descendingKeySet() // return a reverse-order key set
+There is also a new method defined to obtain a NavigableSet of keys:
+
+NavigableSet<K> navigableKeySet() // return a forward-order key set
+You might wonder why the method keySet, inherited from Map, could not simply be overridden using a covariant return type to return a NavigableSet. Indeed, the platform implementations of NavigableMap.keySet do return a NavigableSet. But there is a compatibility concern: if TreeMap.keySet were to have its return type changed from Set to NavigableSet, any existing TreeMap subclasses which override that method would now fail to compile unless they too changed their return type. (This concern is similar to those discussed in Maintain Binary Compatibility.)
+
+TreeMap
+SortedMap is implemented in the Collections Framework by TreeMap. We met trees as a data structure for storing elements in order when we discussed TreeSet (see TreeSet). In fact, the internal representation of a TreeSet is just a TreeMap in which every key is associated with the same standard value, so the explanation of the mechanism and performance of red-black trees given in TreeSet applies equally here.
+
+The constructors for TreeMap include, besides the standard ones, one that allows you to supply a Comparator and one that allows you to create one from another SortedMap, using both the same comparator and the same mappings:
+
+public TreeMap(Comparator<? super K> comparator)
+public TreeMap(SortedMap<K, ? extends V> m)
+Notice that the second of these constructors suffer from a similar problem to the corresponding constructor of TreeSet (see TreeSet), because the standard conversion constructor always uses the natural ordering of the keys, even when its argument is actually a SortedMap.
+
+TreeMap has similar performance characteristics to TreeSet: the basic operations (get, put, and remove) perform in O(log n) time). The collection view iterators are fail-fast.
+
+ConcurrentMap
+Maps are often used in high-performance server applications—for example, as cache implementations—so a high-throughput thread-safe map implementation is an essential part of the Java platform. This requirement cannot be met by synchronized maps such as those provided by Collections.synchronizedMap, because with full synchronization each operation needs to obtain an exclusive lock on the entire map, effectively serializing access to it. Locking only a part of the collection at a time—lock striping—can achieve very large gains in throughput, as we shall see shortly with ConcurrentHashMap. But because there is no single lock for a client to hold to gain exclusive access, client-side locking no longer works, and clients need assistance from the collection itself to carry out atomic actions.
+
+That is the purpose of the interface ConcurrentMap. It provides declarations for methods that perform compound operations atomically. There are four of these methods:
+
+V putIfAbsent(K key, V value)
+        // associate key with value only if key is not currently present.
+        // return the old value (may be null) if the key was present,
+        // otherwise return null
+boolean remove(Object key, Object value)
+        // remove key only if it is currently mapped to value. Returns
+        // true if the value was removed, false otherwise 
+V replace(K key, V value)
+        // replace entry for key only if it is currently present. Return
+        // the old value (may be null) if the key was present, otherwise
+        // return null
+boolean replace(K key, V oldValue, V newValue)
+        // replace entry for key only if it is currently mapped to oldValue.
+        // return true if the value was replaced, false otherwise
+ConcurrentHashMap
+ConcurrentHashMap provides an implementation of ConcurrentMap and offers a highly effective solution to the problem of reconciling throughput with thread safety. It is optimized for reading, so retrievals do not block even while the table is being updated (to allow for this, the contract states that the results of retrievals will reflect the latest update operations completed before the start of the retrieval). Updates also can often proceed without blocking, because a ConcurrentHashMap consists of not one but a set of tables, called segments, each of which can be independently locked. If the number of segments is large enough relative to the number of threads accessing the table, there will often be no more than one update in progress per segment at any time. The constructors for ConcurrentHashMap are similar to those of HashMap, but with an extra one that provides the programmer with control over the number of segments that the map will use (its concurrency level):
+
+ConcurrentHashMap()
+ConcurrentHashMap(int initialCapacity)
+ConcurrentHashMap(int initialCapacity, float loadFactor)
+ConcurrentHashMap(
+  int initialCapacity, float loadFactor, int concurrencyLevel)
+ConcurrentHashMap(Map<? extends K,? extends V> m)
+The class ConcurrentHashMap is a useful implementation of Map in any application where it is not necessary to lock the entire table; this is the one capability of SynchronizedMap which it does not support. That can sometimes present problems: for example, the size method attempts to count the entries in the map without using locks. If the map is being concurrently updated, however, the size method will not succeed in obtaining a consistent result. In this situation, it obtains exclusive access to the map by locking all the segments, obtaining the entry count from each, then unlocking them again. The performance cost involved in this is a justifiable tradeoff against the highly optimized performance for common operations, especially reads. Overall, ConcurrentHashMap is indispensable in highly concurrent contexts, where it performs far better than any available alternative.
+
+Disregarding locking overheads such as those just described, the cost of the operations of ConcurrentHashMap are similar to those of HashMap. The collection views return weakly consistent iterators.
+
+ConcurrentNavigableMap
+Figure 16-7. ConcurrentNavigableMap
+ConcurrentNavigableMap
+ConcurrentNavigableMap (see Figure 16-7) inherits from both ConcurrentMap and NavigableMap, and contains just the methods of these two interfaces with a few changes to make the return types more precise. The range-view methods inherited from SortedMap and NavigableMap now return views of type ConcurrentNavigableMap. The compatibility concerns that prevented NavigableMap from overriding the methods of SortedMap don’t apply here to overriding the range-view methods of NavigableMap or SortedMap; because neither of these has any implementations that have been retrofitted to the new interface, the danger of breaking implementation subclasses does not arise. For the same reason, it is now possible to override keySet to return NavigableSet.
+
+ConcurrentSkipListMap
+The relationship between ConcurrentSkipListMap and ConcurrentSkipListSet is like that between TreeMap and TreeSet; a ConcurrentSkipListSet is implemented by a ConcurrentSkipListMap in which every key is associated with the same standard value, so the mechanism and performance of the skip list implementation given in ConcurrentSkipListSet applies equally here: the basic operations (get, put, and remove) perform inO(log n) time); iterators over the collection views execute next in constant time. These iterators are fail-fast.
+
+Comparing Map Implementations
+Table 16-1 shows the relative performance of the different platform implementations of Map (the column headed “next” shows the cost of the next operation of iterators over the key set). As with the implementations of queue, your choice of map class is likely to be influenced more by the functional requirements of your application and the concurrency properties that you need.
+
+Some specialized situations dictate the implementation: EnumMap should always (and only) be used for mapping from enums. Problems such as the graph traversals described in IdentityHashMap call for IdentityHashMap. For a sorted map, use TreeMap where thread safety is not required, and ConcurrentSkipListMap otherwise.
+
+Table 16-1. Comparative performance of different Map implementations
+
+get
+
+containsKey
+
+next
+
+Notes
+
+HashMap
+
+O(1)
+
+O(1)
+
+O(h/n)
+
+h is the table capacity
+
+LinkedHashMap
+
+O(1)
+
+O(1)
+
+O(1)
+
+ 
+IdentityHashMap
+
+O(1)
+
+O(1)
+
+O(h/n)
+
+h is the table capacity
+
+EnumMap
+
+O(1)
+
+O(1)
+
+O(1)
+
+ 
+TreeMap
+
+O(log n)
+
+O(log n)
+
+O(log n)
+
+ 
+ConcurrentHashMap
+
+O(1)
+
+O(1)
+
+O(h/n)
+
+h is the table capacity
+
+ConcurrentSkipListMap
+
+O(log n)
+
+O(log n)
+
+O(1)
+
+ 
+That leaves the choice of implementation for general-purpose maps. For concurrent applications, ConcurrentHashMap is the only choice. Otherwise, favor LinkedHashMap over HashMap (and accept its slightlyworse performance) if you need to make use of the insertion or access order of the map—for example, to use it as a cache.
+
+table of contents
+search
+Settings
+queue

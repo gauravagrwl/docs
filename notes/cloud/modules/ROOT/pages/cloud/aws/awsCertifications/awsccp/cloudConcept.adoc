@@ -1,0 +1,105 @@
+= AWS - CCP (CLF-C02) Domain 1: Cloud Concepts
+:navtitle: Cloud Concepts
+:description: 
+
+{description}
+
+== Task Statement 1.1: Define the benefits of the AWS Cloud.
+
+*Knowledge of:*
+* Value proposition of the AWS Cloud
+
+*Skills in:*
+
+* Understanding the economies of scale (for example, cost savings)
+* Understanding the benefits of global infrastructure (for example, speed of deployment, global reach)
+* Understanding the advantages of high availability, elasticity, and agility
+
+== Task Statement 1.2: Identify design principles of the AWS Cloud.
+
+*Knowledge of:*
+* AWS Well-Architected Framework
+
+*Skills in:*
+* Understanding the pillars of the Well-Architected Framework (for example,
+operational excellence, security, reliability, performance efficiency, cost optimization, sustainability)
+* Identifying differences between the pillars of the Well-Architected
+Framework
+
+== Task Statement 1.3: Understand the benefits of and strategies for migration to the AWS Cloud.
+
+*Knowledge of:*
+
+* Cloud adoption strategies
+* Resources to support the cloud migration journey
+
+*Skills in:*
+* Understanding the benefits of the AWS Cloud Adoption Framework (AWS
+CAF) (for example, reduced business risk; improved environmental, social,
+and governance (ESG) performance; increased revenue; increasedoperational efficiency)
+* Identifying appropriate migration strategies (for example, database
+replication, use of AWS Snowball)
+
+== Task Statement 1.4: Understand concepts of cloud economics.
+
+*Knowledge of:*
+
+* Aspects of cloud economics
+* Cost savings of moving to the cloud
+
+*Skills in:*
+
+* Understanding the role of fixed costs compared with variable costs
+* Understanding costs that are associated with on-premises environments
+* Understanding the differences between licensing strategies (for example,Bring Your Own License [BYOL] model compared with included licenses)
+* Understanding the concept of rightsizing
+* Identifying benefits of automation (for example, provisioning and configuration management with AWS CloudFormation)
+* Identifying managed AWS services (for example, Amazon RDS, Amazon
+Elastic Container Service [Amazon ECS], Amazon Elastic Kubernetes Service
+[Amazon EKS], Amazon DynamoDB)
+
+---
+---
+=== Rough
+
+What is Cloud?
+On-Demand
+Pay As you go
+Netwrok Accessible
+
+AWS is the world's most comprehensive and broadly adopted cloud platform, offering over 200 fulllt featured services from data center globally. 
+Millions of customers - including the fastest growing startups, largest enterprise and leading government agencies - are using AWs to lower costs become more agile and innovate faster.
+
+Cloud Value Propositions:
+1. 
+Security - AWS offers easy access to centralized sercurity services and features.
+2. Reliability: Reduce the KTLO task because AWS manages the data center.
+3. High Avialability: 
+4. Elasticity: Scale out for performance, scale in for cost. IT is not just about adding resource to meet the demand but also reducing the resources when the demand is reduced.
+It is more on horizontal scaling, adding and removing resources to meet the demand.and it implies automation and redundancy of those resources.
+5. Agility: AWS democratize advanced technologies making them easier to adopt.
+6. Pay - as  - you go Pricings:
+7. Scalability: the ability of a system to increase the resources allocated to match the demand. It's more designed for the addition of resources and recognizing where the ceiling is where you can no longer add more resources for a particular use case. Scalability can also include vertical scaling where rather than adding extra servers as an example, that would be horizontal scaling, vertical scaling would be opening up one server and just putting more CPU and memory into it. And so, it does not necessarily imply automation, although self-healing is definitely possible when you consider scalability. 
+8. Global reach: AWS from data centers to availability zones to regions, 
+9. Economy of scale.
+
+Cloud Business Value:
+This speaks directly to the agility of the company. 
+
+full cost transparency. 
+mechanical sympathy
+ability to switch technologies as our demand changes
+Recover Automatically from failure
+We have the ability to experiment. 
+the ability to deploy globally without having to manage data centers. 
+
+We saw all those tasks that are required to maintain a data center, and how none of those contribute to business value or agility of the company. 
+So if we can get all the benefits of a global infrastructure without having to do all that work, that's a huge benefit and also contributes to that business value.
+
+CAF (Cloud Adoption Framework):
+. Business
+. People
+. Governance
+. Platform
+. Security
+. Operations

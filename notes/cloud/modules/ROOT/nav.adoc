@@ -1,0 +1,8 @@
+* xref:cloud/index.adoc[]
+* xref:cloud/aws/aws-index.adoc[]
+** xref:cloud/aws/awsCertifications/awsccp/awsccp.adoc[]
+*** xref:cloud/aws/awsCertifications/awsccp/cloudConcept.adoc[Cloud Concepts]
+*** xref:cloud/aws/awsCertifications/awsccp/securityAndCompliance.adoc[Security and Compliance]
+*** xref:cloud/aws/awsCertifications/awsccp/cloudTechnologyAndService.adoc[Cloud Technology and Service]
+*** xref:cloud/aws/awsCertifications/awsccp/billingPricingAndSupport.adoc[Billing, Price, and Support]
+*** xref:cloud/aws/awsCertifications/awsccp/awsCCPMockQuestions.adoc[Mock Questions]
