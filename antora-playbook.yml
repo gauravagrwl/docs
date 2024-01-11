@@ -7,8 +7,9 @@ content:
   sources:
     - url: ../docs
       start_paths:
-        - notes/docs
+        - notes/techDocs
         - notes/cloud
+        - notes/interview
       branches:
         - 'HEAD'
 ui:
@@ -45,4 +46,4 @@ asciidoc:
 
 output:
   clean: true
-  # dir: _site/docs
+  dir: _site/docs

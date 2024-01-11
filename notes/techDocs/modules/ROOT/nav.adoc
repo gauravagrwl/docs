@@ -1,0 +1,8 @@
+* xref:java/java.adoc[]
+** xref:java/collections/collections.adoc[]
+*** xref:java/collections/collectionSummary.adoc[Summary]
+* xref:effectiveJava/effectiveJava.adoc[]
+** .xref:effectiveJava/creatingAndDestroyingObject.adoc[Creating And Destroying Object]
+** .xref:effectiveJava/methodsCommonToAllObjects.adoc[Methods Common to All Objects]
+** .xref:effectiveJava/classesAndInterface.adoc[Classes and Interfaces]
+** .xref:effectiveJava/generics.adoc[Generics]

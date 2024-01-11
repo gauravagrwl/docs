@@ -1,0 +1,178 @@
+= AWS - CCP (CLF-C02) Domain 1: Cloud Concepts
+:navtitle: Cloud Concepts
+:description: 
+:table-caption!:
+
+{description}
+
+== Task Statement 1.1: Define the benefits of the AWS Cloud.
+[%collapsible]
+====
+
+.*Knowledge of*
+* Value proposition of the AWS Cloud
+
+.*Skills in:*
+* Understanding the economies of scale (for example, cost savings)
+* Understanding the benefits of global infrastructure (for example, speed of deployment, global reach)
+* Understanding the advantages of high availability, elasticity, and agility
+
+====
+
+=== What is Cloud Computing:
+
+
+.*NIST*
+[%collapsible]
+====
+Cloud computing is a model for *enabling ubiquitous*, *convenient*, *on-demand network access* to a shared pool of configurable computer resources (e.g., networks, servers, storage, applications, and services) that can be *rapidly provisioned* and *released* with *minimal* management effort or service provider interaction.
+====
+
+.*AWS*
+[%collapsible]
+====
+Cloud computing is the on-demand delivery of IT resources over the Internet with pay-as-you-go pricing. Instead of buying, owning, and maintaining physical data centers and servers, you can access technology services, such as computing power, storage, and databases, on an as-needed basis from a cloud provider like Amazon Web Services (AWS).
+====
+
+.*AZURE*
+[%collapsible]
+====
+The definition for the cloud can seem murky, but essentially, it’s a term used to describe a global network of servers, each with a unique function. The cloud is not a physical entity, but instead is a vast network of remote servers around the globe which are hooked together and meant to operate as a single ecosystem. These servers are designed to either store and manage data, run applications, or deliver content or a service such as streaming videos, web mail, office productivity software, or social media. Instead of accessing files and data from a local or personal computer, you are accessing them online from any Internet-capable device—the information will be available anywhere you go and anytime you need it.
+====
+
+.*GCP*
+[%collapsible]
+====
+Cloud computing is the on-demand availability of computing resources (such as storage and infrastructure), as services over the internet. It eliminates the need for individuals and businesses to self-manage physical resources themselves, and only pay for what they use.
+====
+
+.*IBM*
+[%collapsible]
+====
+Cloud computing is on-demand access, via the internet, to computing resources—applications, servers (physical servers and virtual servers), data storage, development tools, networking capabilities, and more—hosted at a remote data center managed by a cloud services provider (or CSP). The CSP makes these resources available for a monthly subscription fee or bills them according to usage.
+====
+
+
+=== AWS Value Proposition:
+
+==== Security:
+
+==== Reliability:
+
+==== High Availability:
+
+==== Elasticity:
+
+==== Agility:
+
+==== Pay As You Go Pricing:
+
+==== Scalability:
+
+==== Global Reach:
+
+==== Economy to Scale:
+
+=== Cloud Busines Value:
+
+==== Full Cost Transparency:
+==== Mechanical Sympathy:
+==== Ability to switch new Technology:
+==== Recover Automatically from failure:
+==== Ability to experiment:
+==== Deploy Globally without data center managment:
+
+
+== Task Statement 1.2: Identify design principles of the AWS Cloud.
+[%collapsible]
+====
+*Knowledge of:*
+* AWS Well-Architected Framework
+
+*Skills in:*
+* Understanding the pillars of the Well-Architected Framework (for example,
+operational excellence, security, reliability, performance efficiency, cost optimization, sustainability)
+* Identifying differences between the pillars of the Well-Architected
+Framework
+====
+
+== Task Statement 1.3: Understand the benefits of and strategies for migration to the AWS Cloud.
+[%collapsible]
+====
+*Knowledge of:*
+
+* Cloud adoption strategies
+* Resources to support the cloud migration journey
+
+*Skills in:*
+* Understanding the benefits of the AWS Cloud Adoption Framework (AWS
+CAF) (for example, reduced business risk; improved environmental, social,
+and governance (ESG) performance; increased revenue; increasedoperational efficiency)
+* Identifying appropriate migration strategies (for example, database
+replication, use of AWS Snowball)
+====
+
+=== Cloud Adoptin Framework(CAF):
+AWS CAF organizes and describes all of the activities and processes involved in planning, creating, managing, and supporting modern IT services. It offers practical guidance and comprehensive guidelines for establishing, developing, and running cloud-based IT capabilities. The AWS CAF organizes guidance into six areas of focus, called perspectives.
+
+.CAF Perspective
+[%autowidth]
+|===
+|Perspective |Descriptions
+
+|Business | Helps you move from separate strategies for business and IT to a business model that integrates IT strategy. Agile IT strategies are aligned to support your business outcomes.
+|People | Helps Human Resources (HR) and personnel management prepare their teams for cloud adoption by updating staff skills and organizational processes to include cloud-based competencies.
+|Governance | Integrates IT Governance and Organizational Governance. It provides guidance on identifying and implementing best practices for IT Governance, and on supporting business processes with technology.
+|Platform | Helps you design, implement, and optimize the architecture of AWS technology based on business goals and objectives. It helps provide strategic guidance for the design, principles, tools, and policies you use.
+|Security | Helps you structure the selection and implementation of controls. Following this guidance can make it easier to identify areas of non-compliance and plan ongoing security initiatives. CIA triad (Cofidentiality, Availabiltiy & Integrity)
+|Operations | Helps you to run, use, operate, and recover IT workloads to levels that meet the requirements of your business stakeholders.
+
+|===
+
+==== CAF Benifits:
+. Reduce Business Risk.
+. Improved environmental, social and governance(ESG) performance.
+. Increased revenue.
+. Increased Operational efficiency.
+
+
+=== 7Rs of Cloud Migrations:
+https://docs.aws.amazon.com/prescriptive-guidance/latest/application-portfolio-assessment-guide/prioritization-and-migration-strategy.html#migration-r-type[7Rs of Cloud Migration]
+
+==== Rehost: Lift and shift, migrate to VMs int CSP with few changes.
+==== Replatform: Migrate from VM to PaaS to reduce overhead, with few changes.
+==== Refactor: Re-architect to be a cloud native.
+==== Relocate:
+==== Repurchase: Often combined with retriring, requires switching to new sfotware, usually SaaS.
+==== Retire: Decomnission
+==== Retain: Hybrid, AWS outposts
+
+
+=== Migration Type:
+
+==== Physical to Virtual (P2V):
+==== Virtual to Virtual (V2V):
+==== Cloud to Cloud (C2C):
+
+=== Migration Strategies:
+
+
+== Task Statement 1.4: Understand concepts of cloud economics.
+[%collapsible]
+====
+*Knowledge of:*
+
+* Aspects of cloud economics
+* Cost savings of moving to the cloud
+
+*Skills in:*
+
+* Understanding the role of fixed costs compared with variable costs
+* Understanding costs that are associated with on-premises environments
+* Understanding the differences between licensing strategies (for example,Bring Your Own License [BYOL] model compared with included licenses)
+* Understanding the concept of rightsizing
+* Identifying benefits of automation (for example, provisioning and configuration management with AWS CloudFormation)
+* Identifying managed AWS services (for example, Amazon RDS, Amazon
+Elastic Container Service [Amazon ECS], Amazon Elastic Kubernetes Service
+[Amazon EKS], Amazon DynamoDB)
+====

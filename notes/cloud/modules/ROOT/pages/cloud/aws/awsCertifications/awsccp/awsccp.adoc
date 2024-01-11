@@ -2,24 +2,24 @@
 :navtitle: AWS-CLF-02
 {description}
 
-// == Program weight
-// .xref:./creatingAndDestroyingObject.adoc[Creating And Destroying Object]
-// [%autowidth]
-// |===
-// |Domain | Weight |Tpoic
+== Program weight
+.xref:./creatingAndDestroyingObject.adoc[Creating And Destroying Object]
+[%autowidth]
+|===
+|Domain | Weight |Tpoic
 
-// | Domain 1 | 24%  | xref:./cloudConcept.adoc[Cloud Concepts]
-// | Domain 2 | 30%  | xref:./securityAndCompliance.adoc[Security and Compliance]
-// | Domain 3 | 34%  | xref:./cloudTechnologyAndService.adoc[Cloud Technology and Service]
-// | Domain 4 | 12%  | xref:./billingPricingAndSupport.adoc[Billing, Price, and Support]
+| Domain 1 | 24%  | xref:./domain1.adoc[Cloud Concepts]
+| Domain 2 | 30%  | xref:./domain2.adoc[Security and Compliance]
+| Domain 3 | 34%  | xref:./domain3.adoc[Cloud Technology and Service]
+| Domain 4 | 12%  | xref:./domain4.adoc[Billing, Price, and Support]
 
-// |===
+|===
 
-// ==  Technologies and Concepts
-// Technologies and concepts that might appear on the exam
-// The following list contains technologies and concepts that might appear on the exam.
-// This list is non-exhaustive and is subject to change. The order and placement of the
-// items in this list is no indication of their relative weight or importance on the exam:
+==  Technologies and Concepts
+Technologies and concepts that might appear on the exam
+The following list contains technologies and concepts that might appear on the exam.
+This list is non-exhaustive and is subject to change. The order and placement of the
+items in this list is no indication of their relative weight or importance on the exam:
 
 // * APIs
 // * Benefits of migrating to the AWS Cloud

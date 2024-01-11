@@ -1,0 +1,294 @@
+= Methods Common to All Objects
+:navtitle: Methods Common to All Objects
+:description: This chapter tells you when and how to override the nonfinal Object methods.
+
+{description}
+
+
+== Item 10: Obey the general contract when overriding equals
+
+[WARNING]
+.Do not override `equals` method if any of the following condition apply:
+====
+1. Each instance of the class is inherently unique. 
+
+2. There is no need for the class to provide a “logical equality” test. 
+
+3. A superclass has already overridden equals, and the superclass behavior is appropriate for this class. 
+
+4. The class is private or package-private, and it is certain that its equals method will never be invoked.
+====
+
+
+*So when is it appropriate to override equals?* 
+
+It is when a class has a *notion of logical equality that differs from mere object identity and a superclass has not already overridden equals*. This is generally knows as *value class*. 
+
+NOTE:A *value class* is simply a class that represents a value, such as Integer or String.
+
+[IMPORTANT]
+.The value class kind that do not require `equals` method to be overridden are
+====
+1. A class that uses instance control (Item 1) to ensure that at most one object exists with each value. 
+2. Enum types (Item 34) fall into this category.
+====
+
+---
+*Allways adhere to the general contract from the specification for Object :*
+
+The `equals` method implements an *equivalence relation*:
+
+• *Reflexive*: For any non-null reference value `x`, `x.equals(x)` must return true.
+
+• *Symmetric*: For any non-null reference values x and y, `x.equals(y)` must return true if and only if `y.equals(x)` returns true.
+
+• *Transitive*: For any non-null reference values x, y, z, if 
+`x.equals(y)` = true and 
+`y.equals(z)` = true, 
+then 
+`x.equals(z)` = true.
+
+• *Consistent*: For any non-null reference values x and y, multiple invocations of x.equals(y) must consistently return true or consistently return false, provided no information used in equals comparisons is modified.
+
+• For any non-null reference value x, x.equals(null) must return false.
+
+---
+
+*here’s a recipe for a high-quality equals method:*
+
+. *Use the == operator to check if the argument is a reference to this object. If so, return true.* 
+[sidebar]
+This is just a performance optimization but one that is worth doing if the comparison is potentially expensive.
+
+[start=2]
+. Use the `instanceof` operator to check if the argument has the correct type. If not, return false. 
+
+.  Cast the argument to the correct type. Because this cast was preceded by an instanceof test, it is guaranteed to succeed.
+
+. For each “significant” field in the class, check if that field of the argument matches the corresponding field of this object. If all these tests succeed, return true; otherwise, return false. 
+
+---
+
+For primitive fields whose type is not `float` or `double`, use the `==` operator for comparisons; for object reference fields, call the equals method recursively; 
+
+For `float` fields, use the static `Float.compare(float, float)`.
+
+For `double` fields, use `Double.compare(double, double)`. 
+
+---
+
+• *Always override hashCode when you override equals* .
+
+---
+
+== Item 11: Always override hashCode when you override equals
+
+*You must override hashCode in every class that overrides equals.* On fail to do so will prevent it from functioning properly in collections such as `HashMap` or `HashSet` which are dependent on `hashCode`.
+
+*Contract of Hashcode*, adapted from the Object specification :
+
+• When the hashCode method is invoked on an object repeatedly during an execution of an application, it must consistently return the same value, provided no information used in equals comparisons is modified. This value need not remain consistent from one execution of an application to another.
+
+• If two objects are `equal` according to the `equals(Object)` method, then calling hashCode on the two objects must produce the same integer result.
+
+• If two objects are unequal according to the `equals(Object)` method, it is not required that calling hashCode on each of the objects must produce distinct results. 
+
+*The key provision that is violated when you fail to override hashCode is the second one: equal objects must have equal hash codes.* Two distinct instances may be logically equal according to a class’s equals method, but to Object’s hashCode method, they’re just two objects with nothing much in common. Therefore, Object’s hashCode method returns two seemingly random numbers instead of two equal numbers as required by the contract.
+
+[source, java]
+----
+//Hashcode computations
+Map<PhoneNumber, String> m = new HashMap<>();
+m.put(new PhoneNumber(707, 867, 5309), "Jenny");
+
+// hashCode method with lazily initialized cached hash code
+// Automatically initialized to 0
+private int hashCode; 
+//Do not be tempted to exclude significant fields from the hash code computation to improve performance.
+
+@Override public int hashCode() {
+    int result = hashCode;
+    if (result == 0) {
+        result = Short.hashCode(areaCode);
+        result = 31 * result + Short.hashCode(prefix);
+        result = 31 * result + Short.hashCode(lineNum);
+        hashCode = result;
+    }
+    return result;
+}
+----
+
+== Item 12: Always override toString
+
+While Object provides an implementation of the toString method, the string that it returns is generally not what the user of your class wants to see. *It consists of the class name followed by an “at” sign (@) and the unsigned hexadecimal representation of the hash code.*, 
+
+The `toString` contract goes on to say, *It is recommended that all subclasses override this method.
+
+1. Providing a good `toString` implementation makes the class much more pleasant to use and makes systems using the class easier to debug.
+
+2. The `toString` method should return all of the interesting information contained in the object.
+
+---
+
+== Item 13: Override clone judiciously
+
+The `Cloneable` interface was intended as a *mixin interface* (Item 20) for classes to advertise that they permit cloning. 
+
+Unfortunately, *it fails to serve this purpose*. 
+* Its primary flaw is that it lacks a `clone` method (*it has no methods*), and 
+* Object’s `clone` method is `protected`. 
+
+We cannot, without resorting to `reflection` (Item 65), invoke clone on an object merely because it implements `Cloneable`. 
+
+*Even a reflective invocation may fail, because there is no guarantee that the object has an accessible clone method.* 
+
+---
+
+*So what does `Cloneable` do*, 
+* It determines the behavior of Object’s protected clone implementation: 
+
+*if a class implements `Cloneable`, Object’s clone method returns a field-by-field copy of the object; otherwise it throws CloneNotSupportedException.*
+
+* In practice, *a class implementing `Cloneable` is expected to provide a properly functioning public clone method.* 
+
+
+The *general contract* for the clone method is weak. Here it is, copied from the `Object` specification :
+
+*Creates and returns a copy of this object.* 
+
+The general intent is that, for any object x, the expression
+
+`x.clone() != x`
+
+will be true, and the expression
+
+`x.clone().getClass() == x.getClass()`
+
+will be true, but these are not absolute requirements. While it is typically the case that
+
+x.clone().equals(x)
+
+will be true, this is not an absolute requirement.
+
+[IMPORTANT]
+====
+By convention, the object returned by this method should be obtained by calling `super.clone`. If a class and all of its superclasses (except Object) obey this convention, it will be the case that
+
+`x.clone().getClass() == x.getClass().`
+====
+
+
+[source, java]
+----
+// Clone method for class with no references to mutable state
+@Override public PhoneNumber clone() {
+    try {
+        return (PhoneNumber) super.clone();
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError();  // Can't happen
+    }
+}
+----
+
+* *immutable classes should never provide a clone method because* it would merely encourage wasteful copying. 
+
+* In effect, *the clone method functions as a constructor*; one must ensure that it does no harm to the original object and that it properly establishes invariants on the clone.
+
+[source, java]
+----
+public class Stack {
+    private Object[] elements;
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    public Stack() {
+        this.elements = new Object[DEFAULT_INITIAL_CAPACITY];
+    }
+}
+----
+Suppose you want to make this class cloneable. *If the clone method merely returns super.clone(), the resulting Stack instance will have the correct value in its size field, but its elements field will refer to the same array as the original Stack instance. Modifying the original will destroy the invariants in the clone and vice versa. You will quickly find that your program produces nonsensical results or throws a NullPointerException.*
+
+In order for the clone method on Stack to work properly, it must copy the internals of the stack. The easiest way to do this is to call clone recursively on the elements array:
+
+[source, java]
+----
+// Clone method for class with references to mutable state
+@Override public Stack clone() {
+    try {
+        Stack result = (Stack) super.clone();
+        result.elements = elements.clone();
+        return result;
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError();
+    }
+}
+----
+
+* *Cloneable architecture is incompatible with normal use of final fields referring to mutable objects*, except in cases where the mutable objects may be safely shared between an object and its clone. In order to make a class cloneable, it may be necessary to remove final modifiers from some fields.
+
+* Like a constructor, *a clone method must never invoke an overridable method on the clone under construction* (Item 19). If clone invokes a method that is overridden in a subclass, this method will execute before the subclass has had a chance to fix its state in the clone, quite possibly leading to corruption in the clone and the original. Therefore, the put(key, value) method discussed in the previous paragraph should be either final or private. (If it is private, it is presumably the “helper method” for a nonfinal public method.)
+
+* Object’s clone method is declared to throw CloneNotSupportedException, but overriding methods need not. *Public clone methods should omit the throws clause*, as methods that don’t throw checked exceptions are easier to use (Item 71).
+
+* One have two choices when designing a class for inheritance (Item 19), but whichever is choose, *the class should not implement `Cloneable`.* One *may choose to mimic the behavior of Object by implementing a properly functioning protected clone method that is declared to throw CloneNotSupportedException.* 
+
+* The clone method must be properly synchronized, just like any other method (Item 78) for thread-safe class that implements `Cloneable`. *Object’s clone method is not synchronized, so even if its implementation is otherwise satisfactory, you may have to write a synchronized clone method that returns super.clone().*
+
+* All classes that implement `Cloneable` *should override clone with a public method whose return type is the class itself. This method should first call super.clone, then fix any fields that need fixing.* 
+
+---
+With this all complexity the better off is to provide an alternative means of object copying. *A better approach to object copying is to provide a copy constructor or copy factory. A copy constructor is simply a constructor that takes a single argument whose type is the class containing the constructor*, for example,
+
+[source, java]
+----
+// Copy constructor
+public Yum(Yum yum) { ... };
+// A copy factory is the static factory (Item 1) analogue of a copy constructor:
+
+// Copy factory
+public static Yum newInstance(Yum yum) { ... };
+----
+
+* A copy constructor or factory can take an argument whose type is an interface implemented by the class. 
+
+* Interface-based copy constructors and factories, more properly known as *conversion constructors* and *conversion factories*, allow the client to choose the implementation type of the copy rather than forcing the client to accept the implementation type of the original. For example, suppose you have a HashSet, s, and you want to copy it as a TreeSet. The clone method can’t offer this functionality, but it’s easy with a conversion constructor: `new TreeSet<>(s)`.
+
+---
+
+== Item 14: Consider implementing Comparable
+
+* By implementing `Comparable`, a class indicates that its instances have a natural ordering. Sorting an array of objects that implement `Comparable` is as simple as this:
+
+`Arrays.sort(a);`
+
+* By implementing `Comparable`, one allow the class to interoperate with all of the many generic algorithms and collection implementations that depend on this interface. 
+
+* Virtually *all of the value classes in the Java platform libraries, as well as all enum types (Item 34), implement Comparable.* 
+
+* Throws `ClassCastException` if the specified object’s type prevents it from being compared to this object.
+
+---
+
+The general contract of the compareTo method is similar to that of equals:
+
+. The implementor must ensure that 
+
+    `sgn(x.compareTo(y)) == -sgn(y. compareTo(x))` for all x and y. 
+    (This implies that x.compareTo(y) must throw an exception if and only if y.compareTo(x) throws an exception.)
+
+. The implementor must also ensure that the relation is transitive: 
+
+        `(x. compareTo(y) > 0 && y.compareTo(z) > 0) implies x.compareTo(z) > 0.`
+
+. Finally, the implementor must ensure that 
+    
+    x.compareTo(y) == 0 implies that sgn(x.compareTo(z)) == sgn(y.compareTo(z)), for all z.
+
+. It is strongly recommended, but not required, that 
+        (x.compareTo(y) == 0) == (x.equals(y)). 
+        Generally speaking, any class that implements the Comparable interface and violates this condition should clearly indicate this fact. The recommended language is “Note: This class has a natural ordering that is inconsistent with equals.”
+
+
+. When comparing field values in the implementations of the `compareTo` methods, *avoid the use of the < and > operators*. Instead, use the static compare methods in the boxed primitive classes or the comparator construction methods in the Comparator interface.
+
+---

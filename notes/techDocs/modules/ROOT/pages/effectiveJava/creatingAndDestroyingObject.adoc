@@ -1,0 +1,495 @@
+= Creating and Destroying Objects
+:navtitle: Creating and Destroying Objects
+:description: when and how to create them, when and how to avoid creating them, how to ensure they are destroyed in a timely manner, and how to manage any cleanup actions that must precede their destruction.
+
+{description}
+
+== Item 1: Consider static factory methods instead of constructors
+
+A class can provide a public *static factory method*, which is simply a *static method* that returns an instance of the class. 
+
+[source,java]
+----
+public static Boolean valueOf(boolean b) {
+    return b ? Boolean.TRUE : Boolean.FALSE;
+}
+----
+
+NOTE: *static factory method* is not same as xref:./creatingAndDestroyingObject.adoc[Factory Method Pattern].
+
+.Advantage
+* *Un-like constructors, they have names*
+
+A class can provide its clients with *static factory methods* instead of, or in addition to, public constructors. Since *static factory methods* don’t share the restriction as with constructor so in cases where a class seems to require multiple constructors with the same signature, replace the constructors with static factory methods and carefully chosen names to highlight their differences.
+
+Ex:
+[source,java]
+----
+public BigInteger(int bitLength, int certainty, Random rnd) {
+// return probably prime number.
+}
+
+// Below added later in Java 4
+public static BigInteger probablePrime(int bitLength, Random rnd) {
+// return probably prime number.
+}
+
+private static BigInteger smallPrime(int bitLength, int certainty, Random rnd) {
+// return probably prime number.
+}
+----
+
+---
+
+. *Un-like constructor they are not required to create a new object each time they are invoked*
+
+This allows immutable classes (Item 17) to use preconstructed instances, or to cache instances as they’re constructed, and dispense them repeatedly to avoid creating unnecessary duplicate objects. 
+
+[source,java]
+----
+Boolean.valueOf(boolean);
+// the above line never creates an object. 
+----
+
+NOTE: This technique is similar to xref:./creatingAndDestroyingObject.adoc[Flyweight Pattern].
+It can greatly improve performance if equivalent objects are requested often, especially if they are expensive to create.
+
+
+The ability of static factory methods to return the same object from repeated invocations allows classes to maintain strict control over what instances exist at any time. *Classes that do this are said to be instance-controlled*. 
+
+*Instance control* allows a class:
+
+. to guarantee that it is a *singleton* (Item 3) or *noninstantiable* (Item 4). 
+. it allows an *immutable value class* (Item 17) to make the guarantee that *no two equal instances exist*: 
+
+`a.equals(b)` if and only if `a == b`. 
+This is the basis of the *Flyweight pattern*. `Enum` (Item 34) types provide this guarantee.
+
+---
+
+. *Un-like constructors, they can return an object of any subtype of their return type.*
+
+This technique lends itself to *interface-based frameworks* (Item 20), where interfaces provide natural return types for static factory methods.
+
+> Prior to Java 8, interfaces couldn’t have static methods. By convention, static factory methods for an interface named _Type_ were put in a noninstantiable companion class (Item 4) named _Types_. 
+For example, the Java Collections Framework has forty-five utility implementations of its interfaces, providing unmodifiable collections, synchronized collections, and the like. Nearly all of these implementations are exported via static factory methods in one noninstantiable class (java.util.Collections). The classes of the returned objects are all nonpublic.
+
+Using a *static factory method* requires the client to refer to the returned object by interface rather than implementation class, which is generally good practice (Item 64).
+
+---
+
+. *The class of the returned object can vary from call to call as a function of the input parameters.* 
+
+Any subtype of the declared return type is permissible. The class of the returned object can also vary from release to release.
+Ex:
+The `EnumSet` return an instance of one of two subclasses, depending on the size of the underlying enum type: 
+
+* if it has sixty-four or fewer elements, it returns `RegularEnumSet` instance, which is backed by a single long; 
+* if the enum type has sixty-five or more elements, the factories return a JumboEnumSet instance, backed by a long array.
+
+---
+
+. *A fifth advantage of static factories is that the class of the returned object need not exist when the class containing the method is written.*
+
+Such flexible static factory methods form the basis of service provider frameworks, like the Java Database Connectivity API (JDBC). A service provider framework is a system in which providers implement a service, and the system makes the implementations available to clients, decoupling the clients from the implementations.
+
+---
+
+.Limitation
+
+. **The main limitation of providing only static factory methods is that classes without public or protected constructors cannot be subclassed.* 
+
+For example, it is impossible to subclass any of the convenience implementation classes in the Collections Framework. Arguably this can be a *blessing in disguise* because it encourages programmers to *use composition instead of inheritance* (Item 18), and is required for *immutable types* (Item 17).
+
+---
+
+. *A second shortcoming of static factory methods is that they are hard for programmers to find as they do stand out in API documentations.* 
+
+---
+
+Here are some common names for static factory methods. This list is far from exhaustive:
+
+• `from` — A type-conversion method that takes a single parameter and returns a corresponding instance of this type, for example:
+
+`Date d = Date.from(instant);`
+
+• `of` — An aggregation method that takes multiple parameters and returns an instance of this type that incorporates them, for example:
+
+`Set<Rank> faceCards = EnumSet.of(JACK, QUEEN, KING);`
+
+• `valueOf` — A more verbose alternative to from and of, for example:
+
+`BigInteger prime = BigInteger.valueOf(Integer.MAX_VALUE);`
+
+• `instance` or `getInstance`— Returns an instance that is described by its parameters (if any) but cannot be said to have the same value, for example:
+
+`StackWalker luke = StackWalker.getInstance(options);`
+
+• `create` or `newInstance` — Like instance or getInstance, except that the method guarantees that each call returns a new instance, for example:
+
+`Object newArray = Array.newInstance(classObject, arrayLen);`
+
+• `getType` — Like getInstance, but used if the factory method is in a different class. Type is the type of object returned by the factory method, for example:
+
+`FileStore fs = Files.getFileStore(path);`
+
+• `newType` — Like newInstance, but used if the factory method is in a different class. Type is the type of object returned by the factory method, for example:
+
+`BufferedReader br = Files.newBufferedReader(path);`
+
+• `type` — A concise alternative to getType and newType, for example:
+
+`List<Complaint> litany = Collections.list(legacyLitany);`
+
+---
+
+== Item 2: Consider a builder when faced with many constructor parameters
+
+Static factories and constructors share a limitation: they do not scale well to large numbers of optional parameters. 
+
+The *telescoping constructor pattern* works, but it is hard to write client code when there are many parameters, and harder still to read it. 
+
+As an alternative when faced with many optional parameters in a constructor is the *JavaBeans pattern*, in which you call a parameterless constructor to create the object and then call setter methods to set each required parameter and each optional parameter of interest.
+
+Unfortunately, the *JavaBeans pattern* has serious disadvantages of its own. 
+. Because construction is split across multiple calls, a *JavaBean may be in an inconsistent state partway through its construction*. 
+. *JavaBeans pattern* precludes *the possibility of making a class immutable* (Item 17) and requires added effort on the part of the programmer to ensure thread safety.
+
+Luckily, there is a third alternative that combines the safety of the telescoping constructor pattern with the readability of the *JavaBeans pattern*. It is a form of the *Builder pattern* [Gamma95]. 
+
+---
+
+.Advantage
+
+Instead of making the desired object directly, the client calls a constructor (or static factory) with all of the required parameters and gets a builder object. Then the client calls setter-like methods on the builder object to set each optional parameter of interest. Finally, the client calls a parameterless build method to generate the object, which is typically immutable. 
+
+*The builder is typically a static member class (Item 24) of the class it builds.* 
+
+* *The Builder pattern simulates named optional parameters as found in Python and Scala.*
+
+* *The Builder pattern is well suited to class hierarchies.* 
+
+* A minor advantage of builders over constructors is that *builders can have multiple varargs parameters* because each parameter is specified in its own method. 
+
+* The Builder pattern is quite flexible. A single builder can be used repeatedly to build multiple objects. 
+
+---
+
+.Limitation
+
+* In order to create an object, first need to create its builder. While the cost of creating this builder is unlikely to be noticeable in practice, it could be a problem in performance-critical situations. 
+
+* Builder pattern is more verbose than the telescoping constructor pattern, so it should be used only if there are enough parameters to make it worthwhile, say four or more. 
+
+---
+
+== Item 3: Enforce the singleton property with a private constructor or an enum type
+
+*A _singleton_ is simply a class that is instantiated exactly once.* 
+Singletons typically represent either a *stateless object such as a function* (Item 24) or a system component that is *intrinsically unique*. 
+
+Ways to implement *singletons*. Both are based on keeping the constructor private and exporting a public static member to provide access to the sole instance. 
+
+[source,java]
+----
+// Singleton with public final field
+public class Elvis {
+    public static final Elvis INSTANCE = new Elvis();
+    private Elvis() { ... }
+
+    public void leaveTheBuilding() { ... }
+}
+----
+
+[source,java]
+----
+// Singleton with static factory
+public class Elvis {
+    private static final Elvis INSTANCE = new Elvis();
+    private Elvis() { ... }
+    public static Elvis getInstance() { return INSTANCE; }
+    // The main advantage is the name static factory method.
+
+    //Also give the flexibility to change approach from singlenton
+    // to non singlenton without changing the API.
+
+    public void leaveTheBuilding() { ... }
+}
+----
+
+CAUTION: A privileged client can invoke the *private constructor reflectively* (Item 65) with the aid of the `AccessibleObject.setAccessible` method in both the above approach. If needed to defend against this attack, modify the constructor to make it throw an exception if it’s asked to create a second instance.
+
+If any of the singleton class uses the approaches *serializable* then it is *not sufficient* merely to add `implements Serializable` to its declaration. 
+
+To maintain the *singleton guarantee*, 
+
+. *declare all instance fields transient and provide a readResolve method (Item 89)*. 
+
+[source, java]
+----
+// readResolve method to preserve singleton property
+private Object readResolve() {
+     // Return the one true Elvis and let the garbage collector
+     // take care of the Elvis impersonator.
+    return INSTANCE;
+}
+----
+
+A third way to implement a singleton is to declare a single-element enum:
+
+Click here to view code image
+[source, java]
+----
+// Enum singleton - the preferred approach 
+//single-element enum type
+public enum Elvis {
+    INSTANCE;
+
+    public void leaveTheBuilding() { ... }
+}
+----
+
+[IMPORTANT]
+==== 
+This approach is similar to the *public field approach*, but it is more concise,
+
+* provides the serialization machinery for free, and 
+* provides an ironclad guarantee against multiple instantiation, even in the face of 
+sophisticated serialization or reflection attacks. 
+==== 
+A *single-element enum type* is often the best way to implement a singleton. 
+
+NOTE: This approach cannot be used if *singleton class* must extend a superclass other than `Enum` .
+
+---
+
+== Item 4: Enforce noninstantiability with a private constructor
+
+Utility classes with list of static method and static fields arenot designed to be instantiated.
+
+In the absence of explicit constructors, however, the compiler provides a public, parameterless default constructor. To a user, this constructor is indistinguishable from any other. It is not uncommon to see unintentionally instantiable classes in published APIs.
+
+*Attempting to enforce noninstantiability by making a class abstract does not work.* 
+
+*A default constructor is generated only if a class contains no explicit constructors, so a class can be made noninstantiable by including a private constructor:*
+
+[source, java]
+---
+// Noninstantiable utility class
+public class UtilityClass {
+    // Suppress default constructor for noninstantiability
+    private UtilityClass() {
+        throw new AssertionError();
+    }
+}
+---
+
+== Item 5: Prefer dependency injection to hardwiring resources
+
+Manu claees depends on ne or more underlying resources.
+What is required is the ability to support multiple instances of the class  each of which uses the resource desired by the client. 
+
+> A simple pattern that satisfies this requirement is to pass the resource into the constructor when creating a new instance. *This is one form of dependency injection*.
+
+[source, java]
+---
+// Dependency injection provides flexibility and testability
+public class SpellChecker {
+    private final Lexicon dictionary;
+
+    public SpellChecker(Lexicon dictionary) {
+        this.dictionary = Objects.requireNonNull(dictionary);
+    }
+
+    public boolean isValid(String word) { ... }
+    public List<String> suggestions(String typo) { ... }
+}
+---
+
+IMPORTANT: A useful variant of the pattern is to pass a resource factory to the constructor. A factory is an object that can be called repeatedly to create instances of a type. Such factories embody the *Factory Method pattern* [Gamma95]. 
+
+[source, java]
+---
+Mosaic create(Supplier<? extends Tile> tileFactory) { ... }
+---
+
+[TIP]
+.Do not
+====
+. use a singleton or static utility class to implement a class that depends on one or more underlying resources whose behavior affects that of the class, 
+. have the class create these resources directly. 
+====
+
+*Pass the resources, or factories to create them, into the constructor (or static factory or builder).*
+
+---
+
+== Item 6: Avoid creating unnecessary objects
+It is often appropriate to reuse a single object instead of creating a new functionally equivalent object each time it is needed. Reuse can be both faster and more stylish. *An object can always be reused if it is immutable*.
+
+As an extreme example of what not to do, consider this statement:
+
+[source, java]
+---
+String s = new String("bikini");  // DON'T DO THIS!
+String s = "bikini"; // Better
+---
+
+* One can often avoid creating unnecessary objects by using *static factory methods* (Item 1) in preference to constructors on immutable classes that provide both. 
+
+.Ex: 
+the factory method `Boolean.valueOf(String)` is preferable to the constructor `Boolean(String)`, which was *deprecated in Java 9*. The constructor must create a new object each time it’s called, while the factory method is never required to do so and won’t in practice. 
+
+* Some object creations are much more expensive than others. If you’re going to need such an “expensive object” repeatedly, it may be advisable to cache it for reuse. 
+
+.Ex:
+Suppose you want to write a method to determine whether a string is a valid Roman numeral. Here’s the easiest way to do this using a regular expression:
+[source, java]
+---
+// Performance can be greatly improved!
+static boolean isRomanNumeral(String s) {
+    return s.matches("^(?=.)M*(C[MD]|D?C{0,3})"
+            + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+}
+---
+
+While `String.matches` is the easiest way to check if a string matches a regular expression, it’s not suitable for repeated use in performance-critical situations.
+The problem is `string.matches` internally creates a Pattern instance for the regular expression and uses it only once, after which it becomes eligible for garbage collection. Creating a Pattern instance is expensive because it requires compiling the regular expression into a finite state machine.
+
+[source, java]
+---
+// Reusing expensive object for improved performance
+public class RomanNumerals {
+    private static final Pattern ROMAN = Pattern.compile(
+            "^(?=.)M*(C[MD]|D?C{0,3})"
+            + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+    static boolean isRomanNumeral(String s) {
+        return ROMAN.matcher(s).matches();
+    }
+}
+---
+
+* When an object is immutable, it is obvious it can be reused safely, but there are other situations where it is far less obvious, even counterintuitive. Consider the case of *adapters*[Gamma95], also known as *views*. *An adapter is an object that delegates to a backing object, providing an alternative interface.* Because an adapter has no state beyond that of its backing object, there’s no need to create more than one instance of a given adapter to a given object.
+
+* The same goes for the `KeySet` method of a `Map`. Although the returned Set instance is typically mutable, all of the returned objects are functionally identical: when one of the returned objects changes, so do all the others, because they’re all backed by the same Map instance. While it is largely harmless to create multiple instances of the keySet view object, it is unnecessary and has no benefits.
+
+* Another way to create unnecessary objects is *autoboxing*, which allows the programmer to mix primitive and boxed primitive types, boxing and unboxing automatically as needed. *Autoboxing blurs but does not erase the distinction between primitive and boxed primitive types.* 
+
+[source, java]
+---
+private static long sum() {
+    Long sum = 0L; 
+    for (long i = 0; i <= Integer.MAX_VALUE; i++)
+        sum += i;
+    return sum;
+    // can be greatly improve if sum can be declared as long.
+}
+---
+
+*prefer primitives to boxed primitives, and watch out for unintentional autoboxing.*
+
+[IMPORTANT]
+.Counterpoint
+====
+
+The counterpoint to this item is *defensive copying (Item 50)*. 
+The present item says, “*Don’t create a new object when you should reuse an existing one*,” while Item 50 says, “*Don’t reuse an existing object when you should create a new one*.” 
+====
+---
+
+== Item 7: Eliminate obsolete object references
+
+* Memory leaks in garbage-collected languages (more properly known as _unintentional object retentions_) are insidious. If an object reference is unintentionally retained, not only is that object excluded from garbage collection, but so too are any objects referenced by that object, and so on. Even if only a few object references are unintentionally retained, many, many objects may be prevented from being garbage collected, with potentially large effects on performance.
+
+Sometime marking object as `null` can make the object eligible for garbage collections.
+
+*Nulling out object references should be the exception rather than the norm.* The best way to eliminate an obsolete reference is to let the variable that contained the reference fall out of scope. *This occurs naturally if you define each variable in the narrowest possible scope (Item 57).*
+
+* Whenever a class manages its own memory, the programmer should be alert for memory leaks. Whenever an element is freed, any object references contained in the element should be nulled out.
+
+* *Another common source of memory leaks is caches.* 
+There are several solutions to this problem.
+.Ex:
+Using `WeakHashMap` but it is useful only if the desired lifetime of cache entries is determined by external references to the key, not the value.
+
+* *A third common source of memory leaks is listeners and other callbacks when clients are not deregistered* 
+One way to ensure that callbacks are garbage collected promptly is to store only weak references to them, for instance, by storing them only as keys in a `WeakHashMap`.
+
+== Item 8: Avoid finalizers and cleaners
+
+* `Finalizers` are unpredictable, often dangerous, and generally unnecessary. 
+As of Java 9, `finalizers` *have been deprecated* and replaced `cleaners`. 
+
+* `Cleaners` are less dangerous than `finalizers`, but still unpredictable, slow, and generally unnecessary.
+
+* *One shortcoming of `finalizers` and `cleaners` is that there is no guarantee they’ll be executed promptly [JLS, 12.6].* 
+
+* One should never do anything *time-critical* in a `finalizer` or `cleaner`.
+* One should never depend on a finalizer or cleaner to update persistent state. 
+* Another problem with `finalizers` is that an uncaught exception thrown during finalization is ignored, and finalization of that object terminates [JLS, 12.6]. `Cleaners` do not have this problem because a library using a cleaner has control over its thread.
+* There is a *severe performance penalty for using `finalizers` and `cleaners`*. 
+* `Finalizers` have a serious security problem: *they open your class up to finalizer attacks.*
+
+[NOTE]
+.finalizer attacks
+====
+If an exception is thrown from a constructor or its serialization equivalents—the readObject and readResolve methods (Chapter 12)—the finalizer of a malicious subclass can run on the partially constructed object that should have “died on the vine.” This finalizer can record a reference to the object in a static field, preventing it from being garbage collected. Once the malformed object has been recorded, it is a simple matter to invoke arbitrary methods on this object that should never have been allowed to exist in the first place. *Throwing an exception from a constructor should be sufficient to prevent an object from coming into existence; in the presence of finalizers, it is not.* Such attacks can have dire consequences. Final classes are immune to finalizer attacks because no one can write a malicious subclass of a final class. *To protect nonfinal classes from finalizer attacks, write a final finalize method that does nothing.*
+====
+
+Instead of writing a `finalizer` or `cleaner` for a class whose objects encapsulate resources that require termination, such as files or threads? Just have the class implement `AutoCloseable`, and require its clients to invoke the close method on each instance when it is no longer needed, typically using `try-with-resources` to ensure termination even in the face of exceptions (Item 9).
+
+---
+
+== Item 9: Prefer try-with-resources to try-finally
+
+Historically, a `try-finally` statement was the best way to guarantee that a resource would be closed properly, even in the face of an exception or return but get worse when added another resource.
+
+[source, java]
+---
+// try-finally is ugly when used with more than one resource!
+static void copy(String src, String dst) throws IOException {
+    InputStream in = new FileInputStream(src);
+    try {
+        OutputStream out = new FileOutputStream(dst);
+        try {
+            byte[] buf = new byte[BUFFER_SIZE];
+            int n;
+            while ((n = in.read(buf)) >= 0)
+                out.write(buf, 0, n);
+        } finally {
+            out.close();
+        }
+    } finally {
+        in.close();
+    }
+}
+---
+
+With the introduction of `try-with-resources` in Java 7. To be usable with this construct, a resource must implement the `AutoCloseable` interface, *which consists of a single void-returning close method*. 
+
+[source, java]
+---
+// try-with-resources on multiple resources - short and sweet
+static void copy(String src, String dst) throws IOException {
+    try (InputStream   in = new FileInputStream(src);
+         OutputStream out = new FileOutputStream(dst)) {
+        byte[] buf = new byte[BUFFER_SIZE];
+        int n;
+        while ((n = in.read(buf)) >= 0)
+            out.write(buf, 0, n);
+    }
+}
+---
+
+[source, java]
+---
+// try-with-resources with a catch clause
+static String firstLineOfFile(String path, String defaultVal) {
+    try (BufferedReader br = new BufferedReader(
+           new FileReader(path))) {
+        return br.readLine();
+    } catch (IOException e) {
+        return defaultVal;
+    }
+}
+---
