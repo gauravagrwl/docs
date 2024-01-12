@@ -1,6 +1,7 @@
 = AWS Certified Cloud Practitioner (CLF-02)
 :navtitle: AWS-CLF-02
 {description}
+:table-caption!:
 
 == Program weight
 .xref:./creatingAndDestroyingObject.adoc[Creating And Destroying Object]
@@ -12,7 +13,6 @@
 | Domain 2 | 30%  | xref:./domain2.adoc[Security and Compliance]
 | Domain 3 | 34%  | xref:./domain3.adoc[Cloud Technology and Service]
 | Domain 4 | 12%  | xref:./domain4.adoc[Billing, Price, and Support]
-
 |===
 
 ==  Technologies and Concepts
