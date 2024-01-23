@@ -1,0 +1,15 @@
+= Monitor Pattern
+:navtitle:  Monitor Pattern
+:description: A way of designing an application object so that it does not produce unpredictable results when more than one thread tries to access the object at the same time in a multithreaded environment.
+
+== Monitor Pattern
+In general, an object may need to access shared resources such as files as part of its implementation to provide the services it is designed for. In a multithreaded environment, when methods of such an object are accessed simultaneously by more than one thread, it could result in unpredictable behavior. Instances of such incorrect and irregular behavior resulting from the concurrent access to an object’s methods by multiple threads are referred to as race conditions.
+
+The monitor is a mechanism to obtain a lock on such an object to ensure that only one thread is allowed to execute any method on that object at any given time. Instead of keeping the responsibility on its client objects, the actual service provider object itself can be designed to be responsible to ensure that no two threads can execute its methods simultaneously. This can be accomplished using the monitor concept. 
+
+In Java this can be accomplished by declaring the methods of an object using the `synchronized` keyword.
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

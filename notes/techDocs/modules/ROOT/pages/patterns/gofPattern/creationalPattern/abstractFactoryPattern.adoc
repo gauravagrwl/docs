@@ -1,0 +1,23 @@
+= Abstract Factory Pattern
+:navtitle: Abstract Factory Pattern
+:description: 
+
+== Abstract Factory Pattern
+
+The Abstract Factory pattern's intent is to provide an interface to use for creating families of related (or dependent) objects without actually specifying their concrete classes. For a given set of related abstract classes, this pattern supplies a technique for creating instances of those abstract classes from an equivalent set of concrete subclasses. On some occasions, it may need to create an object without having to know which concrete subclass of object to create. Allows the creation of an instance of a class from a suite of related classes without having a client object to specify the actual concrete class to be instantiated.
+
+The Abstract Factory pattern takes the concept of Factory pattern to the next level. In simple terms, an abstract factory is a class that provides an interface to produce a family of objects. In the Java programming language, it can be implemented either as an interface or as an abstract class.
+
+The Abstract Factory pattern is useful when a client object wants to create an instance of one of a suite of related, dependent classes without having to know which specific concrete class is to be instantiated. 
+
+=== Benefits:
+*   It isolates the client from concrete (implementation) classes.
+*   It eases the exchanging of object families.
+*   It promotes consistency among objects. 
+
+	 
+=== Applicable Scenarios
+*   The system needs to be configured with one of multiple families of objects.
+*   The system needs to be independent of how its objects are created, composed, and represented.
+*   The family of related objects is intended to be used together, and this constraint needs to be enforced.
+*   You want to provide a library of objects that does not show implementations and only reveals interfaces. 

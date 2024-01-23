@@ -1,0 +1,148 @@
+= Overview of the UML
+:navtitle: UML
+:description: UML
+:page-toclevels: 5
+
+== UML Quick Reference
+UML offers **12 diagrams** towards representing an application’s requirements analysis and solution design which can be classified into 3 categories as follows.
+
+[%autowidth]
+|===
+|STRUCTURE DIAGRAMS         | BEHAVIOR DIAGRAMS             | MODEL MANAGEMENT DIAGRAMS
+
+|   1. Class diagrams       |   5. Use Case diagrams        |   10. Packages            
+|   2. Object diagrams      |   6. Sequence diagrams        |   11. Subsystems          
+|   3. Component Diagrams   |   7. Activity diagrams        |   12. Models              
+|   4. Deployment Diagrams  |   8. Collaboration diagrams   |      -                    
+|        -                  |   9. Statechart diagram       |      -                    
+
+|===
+
+=== Class Diagram
+Class diagrams are part of the *structure diagrams* and are used to describe the static structure of a system. The structure and behavior of classes and their association with other classes are depicted inside of a class diagram.
+
+It consists of three compartments (rectangular sections).
+
+1. First Compartment: Class Name
+2. Second Compartment: Set of Attributes
+3. Thrid Compartment: Lists of Methods
+
+[mermaid]
+....
+classDiagram
+class Square~Shape~{
+    int id
+    List~int~ position
+    setPoints(List~int~ points)
+    getPoints() List~int~
+}
+
+Square : -List~string~ messages
+Square : +setMessages(List~string~ messages)
+Square : +getMessages() List~string~
+Square : +getDistanceMatrix() List~List~int~~
+Square: someStaticMethod() String$
+....
+
+- Inner Class Representation: <<TODO>>
+
+- Abstract Class / Method Representation: <<TODO>>
+- Exception Representation: <<TODO>>
+
+*Generalization*:
+Generalization is used to depict the object-oriented concept of **inheritance** when there is a base class with common behavior and each of its derived classes contains specific details/behavior.
+
+- Abstract Class/Method Representation: <<TODO>>
+
+- Representation of Methods Throwing Exceptions: <<TODO>>
+
+- Inheritance Relationship Representation: <<TODO>>
+
+*Interface*:
+An interface specifies the externally visible operations of a class, but not the actual implementation of those operations. An interface often specifies only a part of the behavior of an actual implementer class. An interface can be drawn using a class-like rectangular setup, with the text “interface” above the name of the interface.
+
+- Interface Representation:
+
+[mermaid]
+....
+classDiagram
+class Shape{
+    << Interface >>
+    noOfVertices
+    draw()
+}
+....
+
+*Realization*:
+A realization depicts the relationship between an interface and a class that provides the actual implementation. This can be drawn in two ways depending on how the interface is depicted.
+
+1. Using a closed, hollow arrowhead pointing from the implementing class to the interface with a dashed line.
+2. With a line and a circle, where the circle represents the interface (with the name of the interface kept near the circle) and the line can be drawn pointing to the class that implements the interface represented by the circle.
+<TODO>
+
+*Dependency*:
+A dependency depicts the relationship between a source and a target component, when there is a dependency relationship between the two. It means, when there is a change in the target, the source element undergoes a necessary change but not vice versa.
+
+- Interface-Implementer Representation I:
+<<TODO>>
+
+- Interface-Implementer Representation II:
+<<TODO>>
+- One Class Dependent on the Other Representation:
+<<TODO>>
+
+==== Class Association:
+Class association specifies the structural relationship between classes.
+
+*Multiplicity Representaion*:    
+
+Multiplicity is used to indicate the number of instances of one class linked to one instance of the other class. 
+
+*Navigability Representaiton*:
+    
+When Class A contains the information required to reach Class B, then the navigability is from Class A to Class B. In other words, Class A knows about Class B, but not vice versa.
+
+It is also possible for the navigability to be bidirectional. In that case, the solid line of association between the two classes either contains arrowheads on both the ends or none.
+
+The following two associations are applicable when there is a whole–part relationship between two classes. In other words, one class contains the other.
+
+*Composition Representation*:
+    Class A contains Class B.
+
+*Aggregation Representation*:
+This is a lighter form of composition. The whole class plays a more important role than the part class, but unlike the case of composition, the part class can meaningfully exist on its own without the whole class.
+Aggregation is a special form of association and means that one thing is made up (in part) of another thing.
+
+A Player is part of a Team.
+A Player can be part of more than one Team and hence, when a Team is dissolved, the Player still remains.
+
+
+[mermaid]
+....
+classDiagram
+classA --|> classB : Inheritance
+classC --* classD : Composition
+classE --o classF : Aggregation
+classG --> classH : Association
+classI -- classJ : Link(Solid)
+classK ..> classL : Dependency
+classM ..|> classN : Realization
+classO .. classP : Link(Dashed)
+....
+
+
+=== Sequence Diagrams
+Sequence diagrams are used to depict interactions among collaborating objects in terms of messages exchanged over time for a specific result. In addition, a sequence diagram may also be used to model business flows. 
+
+
+*Object*:
+An object is represented with the name of the class in a rectangle preceded by a colon.
+
+<<TODO>>
+
+*Message*: 
+A message is a communication between objects. The solid horizontal line indicating a message can be labeled with the name of the message/operation along with its argument values.
+<<TODO>>
+*Self Call*:
+This is a message call from an object onto itself.
+<<TODO>>

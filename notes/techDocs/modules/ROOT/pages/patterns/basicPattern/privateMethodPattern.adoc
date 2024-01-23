@@ -1,0 +1,33 @@
+= Private Method Patterns
+:navtitle:  Private Method Patterns
+:description: Provide a way of designing a class behavior so that external objects are not permitted to access the behavior that is meant only for the internal use.
+
+== Private Methods Patterns
+
+Typically a class is designed to offer a well-defined and related set of services to its clients. 
+
+These services are offered in the form of its **methods**, which constitute the overall **behavior of that object**. 
+
+[IMPORTANT]
+====
+In case of a well-designed class, each method is designed to perform a single, defined task. 
+====
+
+Some of these methods may use the functionality offered by other methods or even other objects to perform the task they are designed for. Not all methods of a class are always meant to be used by external client objects. 
+
+Those methods that offer defined services to different client objects make up an object’s public protocol and are to be declared as public methods. 
+
+Some of the other methods may exist to be used internally by other methods or inner classes of the same object. 
+
+The **Private Methods pattern** recommends designing such methods as private methods.
+
+In Java, a method signature starts with an access specifier (private/protected/public).
+
+Access specifiers indicate the scope and visibility of a method/variable.
+
+A method is declared as private by using the “private” keyword as part of its signature.
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

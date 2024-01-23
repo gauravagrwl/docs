@@ -1,0 +1,17 @@
+=  Creational Pattern
+:navtitle:  Creational Pattern
+:description: 
+
+
+== Creational Pattern
+Creational design patterns are concerned with the way the objects are created. These patterns are used when a decision must be made at the time of a class instantiated. Typically, the details of the concrete class that is to be instantiated are hidden from (and unknown to) the calling class by an abstract class that knows only about the abstract class or the interface it implements. 
+
+Creational design patterns are composed of two dominant ideas.
+*   One is encapsulating knowledge about which concrete classes the system use. 
+*   Another is hiding how instances of these concrete classes are created and combined.
+	
+The creational patterns aim to separate a system from how its objects are created, composed, and represented. They increase the system's flexibility in terms of the what, who, how, and when of object creation.
+	
+Creational design patterns are used to design the instantiation process of objects. The creational pattern uses the inheritance to vary the object creation.
+
+There can be some cases when two or more patterns looks fit as a solution to a problem. At other times, the two patterns complement each other for example; Builder can be used with other pattern to implements which components to get built.

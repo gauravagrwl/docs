@@ -1,0 +1,19 @@
+= Abstract Parent Class Pattern
+:navtitle:  Abstract Parent Class Pattern
+:description: Useful for designing a framework for the consistent implementation of the functionality common to a set of related classes.
+
+== Abstract Parent Class Patterns:
+An abstract method is a method that is declared, but contains no implementation. An abstract class is a class with one or more abstract methods. Abstract methods, with more than one possible implementation, represent variable parts of the behavior of an abstract class. An abstract class may contain implementations for other methods, which represent the invariable parts of the class functionality.
+
+Different subclasses may be designed when the functionality outlined by abstract methods in an abstract class needs to be implemented differently. An abstract class, as is, may not be directly instantiated. When a class is designed as a subclass of an abstract class, it must implement all of the abstract methods declared in the parent abstract class. Otherwise the subclass itself becomes an abstract class. Only nonabstract subclasses of an abstract class can be instantiated. 
+
+The set of methods implemented by the abstract parent class is automatically inherited by all subclasses. This eliminates the need for redundant implementations of these methods by each subclass.
+
+In the Java programming language there is no support for multiple inheritance. That means a class can inherit only from one single class. Hence inheritance should be used only when it is absolutely necessary.
+
+This means that every implementer of an interface must explicitly implement all methods declared in an interface, even when some of these methods represent the invariable part of the functionality and have exactly the same implementation in all of the implementer classes. This leads to redundant code.
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

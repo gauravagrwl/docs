@@ -1,0 +1,21 @@
+= Accessor Methods Pattern
+:navtitle:  Accessor Methods Pattern
+:description: Provide a way of accessing an object's state using specific methods. This approach discourages different client objects from directly accessing the attributes of an object, resulting in a more maintainable class structure.
+
+== Accessor Methods Patterns:
+The Accessor Methods pattern is one of the most commonly used patterns in the area of object-oriented programming. In general, the values of different instance variables of an object, at a given point of time, constitute its state. The state of an object can be grouped into two categories — **public** and **private**. 
+
+The public state of an object is available to different client objects to access, whereas the private state of an object is meant to be used internally by the object itself and not to be accessed by other objects.
+
+In case of an object, the Accessor Method pattern recommends:
+
+*   All instance variables being declared as `private` and `provide public methods` known as accessor methods to access the public state of an object. This prevents external client objects from accessing object instance variables directly. In addition, accessor methods hide from the client whether a property is stored as a direct attribute or as a derived one.
+
+*   Client objects can make use of accessor methods to move a class object from one state (source) to another state (target). In general, if the object cannot reach the target state, it should notify the caller object that the transition could not be completed. This can be accomplished by having the accessor method throw an exception.
+
+*   If an object is designed to access its instance variables through accessor methods, any change to the definition of an instance variable requires a change only to its accessor methods.
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

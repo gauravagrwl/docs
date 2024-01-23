@@ -1,0 +1,21 @@
+= Basic Patterns
+:navtitle: Basic Patterns
+:description: These are most common design patterns which are used in the aread of Object Oriented Programming Language.
+
+
+{description}
+
+== Basic Patterns Classifications
+[%autowidth]
+|===
+|Basic Patterns |Descriptions 
+
+| Interface| Can be used to design a set of service provider classes that offer the same service so that a client object can use different classes of service provider objects in a seamless manner without having to alter the client implementation.
+| Abstract Parent Class| Useful for designing a framework for the consistent implementation of the functionality common to a set of related classes.
+| Private Methods| Provide a way of designing a class behavior so that external objects are not permitted to access the behavior that is meant only for the internal use.
+| Accessor Methods| Provide a way of accessing an objects state using specific methods. This approach discourages different client objects from directly accessing the attributes of an object, resulting in a more maintainable class structure.
+| Constant Data Manager| Useful for designing an easy to maintain, centralized repository for the constant data in an application.
+| Immutable Object| Used to ensure that the state of an object cannot be changed. May be used to ensure that the concurrent access to a data object by several client objects does not result in race conditions.
+| Monitor| A way of designing an application object so that it does not produce unpredictable results when more than one thread tries to access the object at the same time in a multithreaded environment.
+
+|===

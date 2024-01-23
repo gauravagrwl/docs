@@ -3,11 +3,11 @@
 :description: 
 
 
-== [Maven](https://maven.apache.org/what-is-maven.html)
+== https://maven.apache.org/what-is-maven.html[Maven]:
 
 **Maven**, a Yiddish word meaning accumulator of knowledge, began as an attempt to simplify the build processes in the Jakarta Turbine project.
 
-**Maven's Objectives:**
+=== Maven's Objectives:
 Maven's primary goal is to allow a developer to comprehend the complete state of a development effort in the shortest period of time. In order to attain this goal, 
 
 Maven deals with several areas of concern:
@@ -19,7 +19,7 @@ Maven deals with several areas of concern:
 5. Making the build process easy
 6. While using Maven doesn't eliminate the need to know about the underlying mechanisms, Maven does shield developers from many details.
 
-**Providing quality project information:**
+=== Providing quality project information:
 Maven provides useful project information that is in part taken from your POM and in part generated from your project's sources. For example, Maven can provide:
 
 1. Change log created directly from source control
@@ -29,7 +29,7 @@ Maven provides useful project information that is in part taken from your POM an
 5. Unit test reports including coverage
 6. Third party code analysis products also provide Maven plugins that add their reports to the standard information given by Maven.
 
-**Providing guidelines for best practices development**
+=== Providing guidelines for best practices development
 Maven aims to gather current principles for best practices development and make it easy to guide a project in that direction.
 For example, specification, execution, and reporting of unit tests are part of the normal build cycle using Maven. Current unit testing best practices were used as guidelines:
 
@@ -100,7 +100,7 @@ Sample `pom.xml`
 9. `build` This element handles things like declaring your project's directory structure and managing plugins.
 
 
-#### [Maven Naming Conventions:](https://maven.apache.org/guides/mini/guide-naming-conventions.html)
+== https://maven.apache.org/guides/mini/guide-naming-conventions.html[Maven Naming Conventions]:
 `groupId` uniquely identifies project across all projects. A **group ID** should follow Java's package name rules. This means it starts with a reversed domain name you control. For example,
 org.apache.maven, org.apache.commons
 
@@ -109,9 +109,9 @@ eg. maven, commons-math
 
 `version` if need to distribute it, then choose any typical version with numbers and dots (1.0, 1.1, 1.0.1, ...).
 
-#### [Maven Build Life Cycle:](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference)
+== https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference[Maven Build Life Cycle]:
 
-**Build Lifecycle Basics**
+=== Build Lifecycle Basics
 Maven is based around the central concept of a build lifecycle. What this means is that the process for building and distributing a particular artifact (project) is clearly defined.
 
 There are three built-in build lifecycles: 
@@ -119,7 +119,7 @@ There are three built-in build lifecycles:
     * **clean**: the `clean` lifecycle handles project cleaning, 
     * **site**: the `site` lifecycle handles the creation of your project's web site.
 
-**A Build Lifecycle is Made Up of Phases**
+=== A Build Lifecycle is Made Up of Phases
 Each of these build lifecycles is defined by a different list of build phases, wherein a build phase represents a stage in the lifecycle.
 
 For example, the `default` lifecycle comprises of the following phases:

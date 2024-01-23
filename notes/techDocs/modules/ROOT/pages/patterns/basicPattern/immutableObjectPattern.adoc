@@ -1,0 +1,19 @@
+= Immutable Object Pattern
+:navtitle:  Immutable Object Pattern
+:description: It is used to ensure that the state of an object cannot be changed. May be used to ensure that the concurrent access to a data object by several client objects does not result in race conditions.
+
+== Immutable Object Pattern
+In general, classes in an application are designed to carry data and have behavior. Sometimes a class may be designed in such a way that its instances can be used just as carriers of related data without any specific behavior. Such classes can be called data model classes and instances of such classes ar e referred to as data objects.
+
+In a typical application scenario, several client objects may simultaneously access instances of such data model classes. This could lead to problems if changes to the state of a data object are not coordinated properly. The Immutable Object pattern can be used to ensure that the concurrent access to a data object by several client objects does not result in any problem. The Immutable Object pattern accomplishes this without involving the overhead of synchronizing the methods to access the object data.
+
+Applying the Immutable Object pattern, the data model class can be designed in such a way that the data carried by an instance of the data model class remains unchanged over its entire lifetime. That means the instances of the data model class become immutable.
+
+In general, concurrent access to an object creates problems when one thread can change data while a different thread is reading the same data. The fact that the data of an immutable object cannot be modified makes it automatically thread-safe and eliminates any concurrent access related problems.
+
+Though using the Immutable Object pattern opens up an application for all kinds of performance tuning tricks, it must be noted that designing an object as immutable is an important decision. Every now and then it turns out that objects that were once thought of as immutables are in fact mutable, which could result in difficult implementation changes.
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

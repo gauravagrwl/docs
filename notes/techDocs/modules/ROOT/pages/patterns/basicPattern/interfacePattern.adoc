@@ -1,0 +1,16 @@
+= Interface Patterns
+:navtitle:  Interface Patterns
+:description: Interface Pattern can be used to design a set of service provider classes that offer the same service so that a client object can use different classes of service provider objects in a seamless manner without having to alter the client implementation.
+
+== Interface Pattern:
+In general, the functionality of an object-oriented system is encapsulated in the form of a set of objects. These objects provide different services either on their own or by interacting with other objects. In other words, a given object may rely upon the services offered by a different object to provide the service it is designed for. An object that requests a service from another object is referred as a client object. Some other objects in the system may seek the services offered by the client object.
+
+Interfaces are used to define sets of interrelated operations that, taken together, form a unit of meaning in an application. An interface tells us a minimum of what an object does, and is the way to define arguments and return values for a method. 
+
+The power of interfaces is that they delineate what is and isn’t expected in how classes collaborate. Interfaces are similar to purely abstract classes, defining expectations but not implementing them.
+
+
+* TODO:
+    1. Class Diagram.
+    2. Sudo Code.
+    3. Code example. GITHUB.

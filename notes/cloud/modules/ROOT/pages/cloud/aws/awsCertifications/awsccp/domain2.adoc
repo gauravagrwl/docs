@@ -23,6 +23,7 @@ Amazon EC2)
 
 === Shared Responsibility Model:
 Depends on the Cloud service model.
+// Add diagram
 
 .Share Responsibility
 [%autowidth]
@@ -37,9 +38,8 @@ Depends on the Cloud service model.
 | Shared Control | Awareness Training | Awareness Training
 | Customer specific | | Region Choice
 | Customer specific | | Service and Feature Choice
+
 |===
-
-
 
 == Task Statement 2.2: Understand AWS Cloud security, governance, and compliance concepts. 
 
@@ -58,6 +58,36 @@ Depends on the Cloud service model.
 * Recognizing services that aid in governance and compliance (for example, monitoring with Amazon CloudWatch; auditing with AWS CloudTrail, AWS Audit Manager, and AWS Config; reporting with access reports) 
 * Recognizing compliance requirements that vary among AWS services 
 ====
+
+=== Compliance:
+https://aws.amazon.com/compliance[Compliance]
+
+Risk and compliance
+Navition GDPR
+
+Data Residency
+
+Data Classification
+
+Compliance Program:
+
+SOC
+PCI
+FedRAMP
+HIPPA
+FINMA
+others
+
+
+=== Comliance Strategies:
+
+=== Audit and Reporting:
+Cloud Watch
+
+Config
+
+Cloud Trail
+
 == Task Statement 2.3: Identify AWS access management capabilities. 
 [%collapsible]
 ====

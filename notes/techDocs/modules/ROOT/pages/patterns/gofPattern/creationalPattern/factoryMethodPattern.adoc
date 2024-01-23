@@ -1,0 +1,24 @@
+= Factory Method Pattern
+:navtitle: Factory Method Pattern
+:description: 
+
+== Factory Method Pattern
+The Factory Method pattern's intent is to define an interface for creating an object but letting the subclass decide which class to instantiate. In other words, the class defers instantiation to subclasses. The client of the Factory Method never needs to know the concrete class that has been instantiated and returned. Its client needs to know only about the published abstract interface. 
+
+A factory method is used when a client object knows when to create an instance of the parent class type, but does not know (or should not know) exactly which class from among the set of subclasses (and possibly the parent class)  should be instantiated. Besides the class selection criteria, a factory method also hides any special mechanism required to instantiate the selected class.
+
+Another strategy is to create a concrete creator class with default implementation for the factory method in it. Different subclasses of this concrete class can override the factory method to implement specialized class selection criteria.
+		 
+=== Limitation:
+*   Refactoring an existing class to use factories breaks the existing clients.
+*   Since the pattern relies on using a private constructor, the class cannot be extended.
+*   If we do extend the class, the subclass must provide its own re-implementation of all factory methods with the exactly same name.
+
+=== Benifits:
+*   It removes the need to bind application-specific classes into the code. The code interacts solely with the resultant interface, so it will work with any classes that implement that interface. 
+*   Because creating objects inside a class is more flexible than creating an object directly, it enables the subclass to provide an extended version of an object. 
+
+=== Applicable Scenarios: 
+*   A class is not able to anticipate the class of objects it needs to create. 
+*   A class wants its subclasses to specify the objects it instantiates. 
+*   Classes assign responsibility to one of several helper subclasses, and you want to localize the knowledge of which helper subclass is the delegate. 

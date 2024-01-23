@@ -1,0 +1,14 @@
++++
+title = "Structural Pattern"
+date = 2020-12-27T09:35:14-06:00
+description = ""
+draft = false
+weight = "2"
+head = ""
+hidden = ""
+alwaysopen = ""
++++
+
+<!--more-->
+
+{{%children style="h6" depth=99 description="true"%}}

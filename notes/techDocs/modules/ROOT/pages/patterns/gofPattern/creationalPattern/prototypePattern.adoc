@@ -1,0 +1,34 @@
+= Prototype Pattern
+:navtitle: Prototype Pattern
+:description: 
+
+== Prototype Pattern
+
+The Prototype pattern's intent is to specify the kinds of objects that need to be created using a prototypical instance, and to then is able to create new objects by copying this prototype. The copying of objects in Java is typically done by the clone() method of java.lang.Object. 
+
+Unlikely, Factory Method and Abstract Factory Method enables client object to create an instance of an appropriate class by invoking a designated method without having to specify the exact concrete class to be instantiated, Prototype pattern offers different more flexible way to achieve the same results.
+
+One of the requirements of the prototype object is that it should provide a way for clients to create a copy of it. By default, all Java objects inherit the builtin clone() method from the topmost java.lang.Object class. The built-in clone() method creates a clone of the original object as a shallow copy.
+
+=== Shallow copy:
+
+*   The original top-level object and all of its primitive members are duplicated.
+*   Any lower-level objects that the top-level object contains are not duplicated.
+*   Only references to these objects are copied. This results in both the original and the cloned object referring to the same copy of the lower-level object.
+
+=== Deep copy:
+
+*   The original top-level object and all of its primitive members are duplicated.
+*   Any lower-level objects that the top-level object contains are also duplicated.
+*   In this case, both the orginal and the cloned object refer to two different lower-level objects.
+
+=== Benefits: 
+*   It lets you add or remove objects at run time.
+*   It lets you specify new objects by varying its values or structure.
+*   It reduces the need for sub-classing.
+*   It lets you dynamically configure an application with classes. 
+
+=== Applicable Scenarios:
+*   The classes to instantiate are specified at run time.
+*   You need to avoid building a class hierarchy of factories that parallels the hierarchy of objects.
+*   Instances of the class have one of only a few different combinations of state. 

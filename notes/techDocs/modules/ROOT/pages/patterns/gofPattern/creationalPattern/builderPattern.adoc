@@ -1,0 +1,18 @@
+= Builder Pattern
+:navtitle: Builder Pattern
+:description: 
+
+
+== Builder Pattern
+The Builder pattern's intent is to separate the construction of a complex object from its representation so that the same construction process can create different objects. The Builder pattern is useful when several kinds of complex objects with similar rules for assembly need to be joined at run time but result in different object types. It achieves this by separating the process of building the object from the object itself. 
+
+The Builder pattern creates complex objects in multiple steps instead of in a single step, as in other patterns. 
+
+=== Benefits:
+*   It permits you to vary an object's internal representation.
+*   It isolates the code for construction and representation.
+*   It provides finer control over the construction process. 
+
+=== Applicable Scenarios: 
+*   The algorithm for creating a complex object needs to be independent of the components that compose the object and how they are assembled.
+*   The construction process is to allow different representations of the constructed object. 

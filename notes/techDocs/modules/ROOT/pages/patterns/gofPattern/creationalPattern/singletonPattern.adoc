@@ -1,0 +1,126 @@
+= Singleton Pattern
+:navtitle: Singleton Pattern
+:description: 
+
+== Singleton Pattern
+
+Provides a controlled object creation mechanism to ensure that only one instance of a given class exists. A class that maintains its single instance nature by itself is referred to as a Singleton Class. 
+
+Ways to make a class Singleton
+*   Make Constructor Private.
+*   Static Public interface to access an instance
+*   To avoid multiple thread to access the Class use Monitor concept so as only one thread can access the class at one time.
+
+
+=== Singleton Lazy Initialization: 
+This method uses double-checked locking, which should not be used prior to J2SE 5.0, as it is vulnerable to subtle bugs. The problem is that an out-of-order write may allow the instance reference to be returned before the Singleton constructor is executed.
+```
+public class Singleton {
+	private static volatile Singleton instance = null;
+	private Singleton() { }
+	public static Singleton getInstance() {
+		if (instance == null) {
+			synchronized (Singleton.class){
+				if (instance == null) {
+					instance = new Singleton();
+				}
+			}
+		}
+		return instance;
+	}
+}
+
+```
+
+=== Eager Initialization:
+If the program will always need an instance, or if the cost of creating the instance is not too large in terms of time/resources, the programmer can switch to eager initialization, which always creates an instance:
+```
+public class Singleton {
+	private static final Singleton instance = new Singleton();
+	private Singleton() {}
+	
+	public static Singleton getInstance() {
+		return instance;
+	}
+}
+
+```
+
+=== Static block initialization:
+
+```
+public class Singleton {
+    private static final Singleton instance;
+	static {
+	try {
+		instance = new Singleton();
+		} catch (IOException e) {
+			throw new RuntimeException("Darn, an error occurred!", e);
+		}
+	}
+	public static  Singleton getInstance() {
+		return  instance;
+    }
+	private Singleton() {
+		// ...
+	}
+}
+
+```
+
+=== The Solution of Bill Pugh:
+
+Pugh's efforts on the "Double-checked locking" idiom led to changes in the Java memory model in Java 5 and to what is generally regarded as the standard method to implement Singletons in Java. The technique known as the initialization on demand holder idiom, is as lazy as possible, and works in all known versions of Java. It takes advantage of language guarantees about class initialization, and will therefore work correctly in all Java-compliant compilers and virtual machines. The nested class is referenced no earlier (and therefore loaded no earlier by the class loader) than the moment that getInstance() is called. Thus, this solution is thread-safe without requiring special language constructs (i.e. volatile  or synchronized ). Alternatively, the inner class SingletonHolder can be also substituted by implementing a Property which provides also access to the static final/read-only class members.
+
+```
+public class Singleton {
+	// Private constructor prevents instantiation from other classes
+	private Singleton() { }
+	/**
+	* SingletonHolder is loaded on the first execution of 
+	* Singleton.getInstance()
+	* or the first access to SingletonHolder.INSTANCE, not before.
+	*/
+	private static class SingletonHolder {
+		public static final Singleton INSTANCE = new Singleton();
+	}
+
+	public static Singleton getInstance() {
+		return SingletonHolder.INSTANCE;
+	}
+}
+
+```
+=== The Enum way:
+The use of an enum is very easy to implement and has no drawbacks regarding serializable objects, which have to be circumvented in the other ways. This approach implements the singleton by taking advantage of Java's guarantee that any enum value is instantiated only once in a Java program. Since Java enum values are globally accessible, so is the singleton. The drawback is that the enum type is somewhat inflexible; for example, it does not allow lazy initialization.
+
+```
+public enum Singleton {
+	INSTANCE;
+	public void execute (String arg) {
+		//... perform operation here ...
+	}
+}
+
+```
+=== Multiton Pattern (Registry of Singletons)
+In software engineering, the multiton pattern  is a design pattern similar to the singleton, which allows only one instance of a class to be created. The multiton pattern expands on the singleton concept to manage a map of named instances as key-value pairs.
+
+Rather than have a single instance per application  (e.g. the java.lang.Runtime  object in the Java programming language) the multiton pattern instead ensures a single instance per key .
+
+=== Lazy Initialization
+In computer programming, lazy initialization is the tactic of delaying the creation of an object, the calculation of a value, or some other expensive process until the first time it is needed.
+This is typically accomplished by maintaining a flag indicating whether the process has taken place. Each time the desired object is summoned, the flag is tested. If it is ready, it is returned. If not, it is initialized on the spot.
+
+=== Object pool
+The object pool pattern is a software creational design pattern that uses a set of initialized objects kept ready to use, rather than allocating and destroying them on demand. A client of the pool will request an object from the pool and perform operations on the returned object. When the client has finished, it returns the object, which is a specific type of factory object, to the pool rather than destroying it.
+
+
+Object pooling can offer a significant performance boost in situations where the cost of initializing a class instance is high, the rate of instantiation of a class is high, and the number of instances in use at any one time is low. The pooled object is obtained in predictable time when creation of the new objects (especially over network) may take variable time.
+However these benefits are mostly true for objects that are expensive with respect to time, such as database connections, socket connections, threads and large graphic objects like fonts or bitmaps. In certain situations, simple object pooling (that hold no external resources, but only occupy memory) may not be efficient and could decrease performance.
+
+*   Handling of empty pools
+Object pools employ one of three strategies to handle a request when there are no spare objects in the pool.
+*   Fail to provide an object (and return an error to the client).
+*   Allocate a new object, thus increasing the size of the pool. Pools that do this usually allow you to set the high water mark (the maximum number of objects ever used).
+*   In a multithreaded environment, a pool may block the client until another thread returns an object to the pool.

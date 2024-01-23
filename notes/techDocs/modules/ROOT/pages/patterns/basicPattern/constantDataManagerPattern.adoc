@@ -1,0 +1,8 @@
+= Constant Data Manager Pattern
+:navtitle:  Constant Data Manager Pattern
+:description: Useful for designing an easy to maintain, centralized repository for the constant data in an application.
+
+== Constant Data Manager Pattern
+Objects in an application usually make use of different types of data in offering the functionality they are designed for. Such data can either be variable data or constant data. The Constant Data Manager pattern is useful for designing an efficient storage mechanism for the constant data used by different objects in an application. In general, application objects access different types of constant data items such as data file names, button labels, maximum and minimum range values, error codes and error messages, etc.
+
+Instead of allowing the constant data to be present in different objects, the Constant Data Manager pattern recommends all such data, which is considered as constant in an application, be kept in a separate object and accessed by other objects in the application. This type of separation provides an easy to maintain, centralized repository for the constant data in an application.

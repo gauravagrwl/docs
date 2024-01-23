@@ -19,7 +19,7 @@ They provide client programs with various models of how to organize their object
 
 * Below shows the main interface of the Java Collection Framework
 
-{{< figure src="../Collections/images/collection_image_1.png" width=100% >}}
+image::collections/collection_image_1.png[Collection Framework]
 
 * `Iterable` defines the contract that a class has to fulfill for its instances to be usable with the `foreach` statement. It is not part of collection framework.
 
@@ -286,7 +286,7 @@ This simple piece of code is polymorphic, which means that it works for any Coll
 
 ### Differences Between Aggregate Operations and Iterators
 
-Aggregate operations, like `forEach`, appear to be like iterators. However, they have several fundamental differences:
+Aggregate operations, like `forEach`, appear to be like *iterators*. However, they have several fundamental differences:
 
 1. **They use internal iteration**: Aggregate operations do not contain a method like next to instruct them to process the next element of the collection. With internal delegation, application determines what collection it iterates, but the JDK determines how to iterate the collection.
 
@@ -301,15 +301,15 @@ Aggregate operations, like `forEach`, appear to be like iterators. However, they
 * Bulk operations perform an operation on an entire Collection.
 * The following are the bulk operations:
 
-    `containsAll` — returns true if the target Collection contains all of the elements in the specified Collection.
+`containsAll` — returns true if the target Collection contains all of the elements in the specified Collection.
 
-    `addAll` — adds all of the elements in the specified Collection to the target Collection.
+`addAll` — adds all of the elements in the specified Collection to the target Collection.
 
-    `removeAll` — removes from the target Collection all of its elements that are also contained in the specified Collection.
+`removeAll` — removes from the target Collection all of its elements that are also contained in the specified Collection.
 
-    `retainAll` — removes from the target Collection all its elements that are not also contained in the specified Collection. That is, it retains only those elements in the target Collection that are also contained in the specified Collection.
+`retainAll` — removes from the target Collection all its elements that are not also contained in the specified Collection. That is, it retains only those elements in the target Collection that are also contained in the specified Collection.
 
-    `clear` — removes all elements from the Collection.
+`clear` — removes all elements from the Collection.
 
 [IMPORTANT]
 ====
@@ -383,10 +383,10 @@ An algorithm based on **CAS** behaves differently:
 * The mechanisms described above lead to iterator policies more suitable for concurrent use than fail-fast, which implicitly regards concurrent modification as a problem to be eliminated.
 
 * **Copy-on-write** collections have **snapshot iterators**. These collections are backed by arrays which, once created, are never changed; if a value in the collection needs to be changed, a new array is created. So an iterator can read the values in one of these arrays (but never modify them) without danger of them being changed by another thread.
-  >> **Snapshot iterators do not throw** `ConcurrentModificationException`.
+  **Snapshot iterators do not throw** `ConcurrentModificationException`.
 
 * **Collections which rely on CAS have weakly consistent iterators**, which reflect some but not necessarily all of the changes that have been made to their backing collection since they were created. For example, if elements in the collection have been modified or removed before the iterator reaches them, it definitely will reflect these changes, but no such guarantee is made for insertions.
-  >> **Weakly consistent iterators also do not throw** `ConcurrentModificationException`.
+  **Weakly consistent iterators also do not throw** `ConcurrentModificationException`.
 
 * The third group **(lock)** described above also have **weakly consistent iterators**. In **Java 6** this includes `DelayQueue` and `PriorityBlockingQueue`, which in Java 5 had fail-fast iterators.
 
