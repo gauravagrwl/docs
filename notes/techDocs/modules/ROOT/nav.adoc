@@ -1,6 +1,7 @@
 * xref:java/java.adoc[]
 ** xref:java/collections/collections.adoc[Collections]
 *** xref:java/collections/sets.adoc[Sets]
+*** xref:java/collections/queues.adoc[Queues]
 *** xref:java/collections/collectionSummary.adoc[Summary]
 * xref:effectiveJava/effectiveJava.adoc[Effective Java]
 ** .xref:effectiveJava/creatingAndDestroyingObject.adoc[Creating And Destroying Object]

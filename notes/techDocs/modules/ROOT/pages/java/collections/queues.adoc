@@ -1,0 +1,477 @@
+= Queues
+:navtitle: Queues
+:figure-caption!:
+:description: 
+
+{description}
+
+
+A `queue` is a `Collection` that is 
+* designed to hold elements for processing, 
+* yielding them up in the order in which they are to be processed. (*First In First Out* _FIFO_ or *Last In Last Out* _LIFO_ ).
+* Was introduce in *Java 5* motivated in part by the need for queues in the concurrency utilities.
+* Beside basic `Collection` operations, it provides additional *insertion*, *removal* and *inspection* operations.
+
+[source, java]
+----
+public interface Queue<E> extends Collection<E> {
+    E element();
+    boolean offer(E e);
+    E peek();
+    E poll();
+    E remove();
+}
+----
+
+* Each `queue` methods exists in two forms:
+** Throws an exceptions if the operations fails
+** Returns special value if operations fails either `null` or `false`.
+
+[%autowidth]
+|===
+|Operations | Throws exceptions | Return special vaule
+
+|Insert | `add(e)`|`offer(e)`
+|Remove |`remove()`|`poll()`
+|Examine |`element()`|`peek()`
+|===
+
+---
+== Implementing Queue
+Below are implementations of the queues.
+
+.Queue Implementations
+image::collections/queue_image_1.png[Implementation of Queue Interface]
+---
+
+=== PriorityQueue
+* `PriorityQueue` is one of the *two nonlegacy `Queue` implementations not designed primarily for concurrent use*.
+* It is *not thread-safe*, also *do not provide blocking behavior*. 
+* It gives up its elements for processing 
+** either the *natural order of its elements* if they implement `Comparable`, or
+** the *ordering imposed* by a `Comparator` supplied when the `PriorityQueue` is constructed.
+* It also accommodates duplicates and gives no gives no guarantee of how it presents multiple elements with the same value.
+
+The constructors for PriorityQueue are:
+[source, java]
+----
+PriorityQueue()       // natural ordering, default initial capacity (11)
+PriorityQueue(Collection<? extends E> c)
+// natural ordering of elements taken from c, unless
+// c is a PriorityQueue or SortedSet, in which case
+// copy c's ordering
+PriorityQueue(int initialCapacity)
+// natural ordering, specified initial capacity
+PriorityQueue(int initialCapacity, Comparator<? super E> comparator)
+// Comparator ordering, specified initial capacity
+PriorityQueue(PriorityQueue<? extends E> c)
+// ordering and elements copied from c
+PriorityQueue(SortedSet<? extends E> c)
+// ordering and elements copied from c
+----
+
+==== Priority Heaps
+* Priority queues are *usually efficiently implemented by priority heaps*. 
+* A *priority heap is a binary tree*, but with two differences: 
+** the only ordering constraint is that each node in the tree should be larger than either of its children, and 
+** that the tree should be complete at every level except possibly the lowest; if the lowest level is incomplete, the nodes it contains must be grouped together at the left.
+* To add a new element to a priority heap:
+** First attached at the leftmost vacant position.
+** Then it is repeatedly exchanged with its parent until it reaches a parent that has higher priority.
+
+.Adding element to Priority Heap
+image::collections/queue_image_2.png[Adding element to Priority Heap]
+
+* Getting the highest-priority element from a priority heap is trivial: it is the root of the tree. But, when that has been removed, the two separate trees that result must be reorganized into a priority heap again:
+** First placing the rightmost element from the bottom row into the root position.
+** It is repeatedly exchanged with the larger of its children until it has a higher priority than either. 
+
+
+.Removing head element of Priority Heap
+image::collections/queue_image_3.png[Removing element of Priority Heap]
+
+* `PriorityQueue` provides `O(log n)` time for `offer`, `poll`, `remove()`, and `add`. 
+* The methods `remove(Object)` and `contains` may require the entire tree to be traversed, so they require `O(n)` time. The methods `peek` and `element`, which just retrieve the root of the tree without removing it, take constant time, as does `size`, which uses an object field that is continually updated.
+
+* `PriorityQueue` is *not suitable for concurrent use*. 
+* Its iterators are fail-fast, and it doesn’t offer support for client-side locking. 
+* A thread-safe version, `PriorityBlockingQueue`.
+<<START HERE>
+=== ConcurrentLinkedQueue
+The other nonblocking Queue implementation is ConcurrentLinkedQueue, an unbounded, thread-safe, FIFO-ordered queue. It uses a linked structure, similar to those we saw in ConcurrentSkipListSet as the basis for skip lists, and in HashSet for hash table overflow chaining. We noticed there that one of the main attractions of linked structures is that the insertion and removal operations implemented by pointer rearrangements perform in constant time. This makes them especially useful as queue implementations, where these operations are always required on cells at the ends of the structure—that is, cells that do not need to be located using the slow sequential search of linked structures.
+
+ConcurrentLinkedQueue uses a CAS-based wait-free algorithm—that is, one that guarantees that any thread can always complete its current operation, regardless of the state of other threads accessing the queue. It executes queue insertion and removal operations in constant time, but requires linear time to execute size. This is because the algorithm, which relies on co-operation between threads for insertion and removal, does not keep track of the queue size and has to iterate over the queue to calculate it when it is required.
+
+ConcurrentLinkedQueue has the two standard constructors discussed in Collection Constructors. Its iterators are weakly consistent.
+
+BlockingQueue
+Java 5 added a number of classes to the Collections Framework for use in concurrent applications. Most of these are implementations of the Queue subinterface BlockingQueue (see Figure 14-5), designed primarily to be used in producer-consumer queues.
+
+BlockingQueue
+Figure 14-5. BlockingQueue
+One common example of the use of producer-consumer queues is in systems that perform print spooling; client processes add print jobs to the spool queue, to be processed by one or more print service processes, each of which repeatedly “consumes” the task at the head of the queue.
+
+The key facilities that BlockingQueue provides to such systems are, as its name implies, enqueuing and dequeueing methods that do not return until they have executed successfully. So, for example, a print server does not need to constantly poll the queue to discover whether any print jobs are waiting; it need only call the poll method, supplying a timeout, and the system will suspend it until either a queue element becomes available or the timeout expires. BlockingQueue defines seven new methods, in three groups:
+
+Adding an Element
+
+boolean offer(E e, long timeout, TimeUnit unit)
+                // insert e, waiting up to the timeout
+void put(E e)   // add e, waiting as long as necessary
+The nonblocking overload of offer defined in Queue will return false if it cannot immediately insert the element. This new overload waits for a time specified using java.util.concurrent.TimeUnit, an Enum which allows timeouts to be defined in units such as milliseconds or seconds.
+
+Taking these methods together with those inherited from Queue, there are four ways in which the methods for adding elements to a BlockingQueue can behave: offer returns false if it does not succeed immediately, blocking offer returns false if it does not succeed within its timeout, add throws an exception if it does not succeed immediately, and put blocks until it succeeds.
+
+Removing an Element
+
+E poll(long timeout, TimeUnit unit)
+                // retrieve and remove the head, waiting up to the timeout
+E take()        // retrieve and remove the head of this queue, waiting
+                // as long as necessary
+Again taking these methods together with those inherited from Queue, there are four ways in which the methods for removing elements from a BlockingQueue can behave: poll returns null if it does not succeed immediately, blocking poll returns null if it does not succeed within its timeout, remove throws an exception if it does not succeed immediately, and take blocks until it succeeds.
+
+Retrieving or Querying the Contents of the Queue
+
+int drainTo(Collection<? super E> c)
+                // clear the queue into c
+int drainTo(Collection<? super E> c, int maxElements)
+                // clear at most the specified number of elements into c
+int remainingCapacity()
+                // return the number of elements that would be accepted
+                // without blocking, or Integer.MAX_VALUE if unbounded
+The drainTo methods perform atomically and efficiently, so the second overload is useful in situations in which you know that you have processing capability available immediately for a certain number of elements, and the first is useful—for example—when all producer threads have stopped working. Their return value is the number of elements transferred. RemainingCapacity reports the spare capacity of the queue, although as with any such value in multi-threaded contexts, the result of a call should not be used as part of a test-then-act sequence; between the test (the call of remainingCapacity) and the action (adding an element to the queue) of one thread, another thread might have intervened to add or remove elements.
+
+BlockingQueue guarantees that the queue operations of its implementations will be threadsafe and atomic. But this guarantee doesn’t extend to the bulk operations inherited from Collection—addAll, containsAll, retainAll and removeAll—unless the individual implementation provides it. So it is possible, for example, for addAll to fail, throwing an exception, after adding only some of the elements in a collection.
+
+Using the Methods of BlockingQueue
+A to-do manager that works for just one person at a time is very limited; we really need a cooperative solution—one that will allow us to share both the production and the processing of tasks. Example 14-1 shows StoppableTaskQueue, a simple version of a concurrent task manager based on PriorityBlockingQueue, that will allow its users—us—to independently add tasks to the task queue as we discover the need for them, and to take them off for processing as we find the time. The class StoppableTaskQueue has three methods: addTask, getTask, and shutDown. A StoppableTaskQueue is either working or stopped. The method addTask returns a boolean value indicating whether it successfully added a task; this value will be true unless the StoppableTaskQueue is stopped. The method getTask returns the head task from the queue. If no task is available, it does not block but returns null. The method shutDown stops the StoppableTaskQueue, waits until all pending addTask operations are completed, then drains the StoppableTaskQueue and returns its contents.
+
+Example 14-1. A concurrent queue-based task manager
+public class StoppableTaskQueue {
+  private final int MAXIMUM_PENDING_OFFERS = Integer.MAX_VALUE;
+  private final BlockingQueue<PriorityTask> taskQueue =
+          new PriorityBlockingQueue<PriorityTask>();
+  private boolean isStopped = false;
+  private Semaphore semaphore = new Semaphore(MAXIMUM_PENDING_OFFERS);
+
+  // return true if the task was successfully placed on the queue, false
+  // if the queue has been shut down.
+  public boolean addTask(PriorityTask task) {
+    synchronized (this) {
+      if (isStopped) return false;
+      if (! semaphore.tryAcquire()) throw new Error("too many threads");
+    }
+    try {
+      return taskQueue.offer(task);
+    } finally {
+      semaphore.release();
+    }
+  }
+
+  // return the head task from the queue, or null if no task is available
+  public PriorityTask getTask() {
+    return taskQueue.poll();
+  }
+
+  // stop the queue, wait for producers to finish, then return the contents
+  public Collection<PriorityTask> shutDown() {
+    synchronized(this) { isStopped = true; }
+    semaphore.acquireUninterruptibly(MAXIMUM_PENDING_OFFERS);
+    Set<PriorityTask> returnCollection = new HashSet<PriorityTask>();
+    taskQueue.drainTo(returnCollection);
+    return returnCollection;
+  }
+}
+In this example, as in most uses of the java.util.concurrent collections, the collection itself takes care of the problems arising from the interaction of different threads in adding or removing items from the queue. Most of the code of Example 14-1 is instead solving the problem of providing an orderly shutdown mechanism. The reason for this emphasis is that when we go on to use the class StoppableTaskQueue as a component in a larger system, we will need to be able to stop daily task queues without losing task information. Achieving graceful shutdown can often be a problem in concurrent systems: for more detail, see Chapter 7 of Java Concurrency in Practice by Brian Goetz et. al. (Addison-Wesley).
+
+The larger system will model each day’s scheduled tasks over the next year, allowing consumers to process tasks from each day’s queue. An implicit assumption of the example of this section is that if there are no remaining tasks scheduled for this day, a consumer will not wait for one to become available, but will immediately go on to look for a task in the next day’s queue. (In the real world, we would go home at this point, or more likely go out to celebrate.) This assumption simplifies the example, as we don’t need to invoke any of the blocking methods of PriorityBlockingQueue, though we will use one method, drainTo, from the BlockingQueue interface.
+
+There are a number of ways of shutting down a producer-consumer queue such as this; in the one we’ve chosen for this example, the manager exposes a shutdown method that can be called by a “supervisor” thread in order to stop producers writing to the queue, to drain it, and to return the result. The shutdown method sets a boolean stopped, which task-producing threads will read before trying to put a task on to the queue. Task-consuming threads simply poll the queue, returning null if no tasks are available. The problem with this simple idea is that a producer thread might read the stopped flag, find it false, but then be suspended for some time before it places its value on the queue. We have to prevent this by ensuring that the shutdown method, having stopped the queue, will wait until all the pending values have been inserted before draining it.
+
+Example 14-1 achieves this using a semaphore—a thread-safe object that maintains a fixed number of permits. Semaphores are usually used to regulate access to a finite set of resources—a pool of database connections, for example. The permits the semaphore has available at any time represent the resources not currently in use. A thread requiring a resource acquires a permit from the semaphore, and releases it when it releases the resource. If all the resources are in use, the semaphore will have no permits available; at that point, a thread attempting to acquire a permit will block until some other thread returns one.
+
+The semaphore in this example is used differently.We don’twant to restrict producer threads from writing to the queue—it’s an unbounded concurrent queue, after all, quite capable of handling concurrent access without help from us. We just want to keep a count of the writes currently in progress. So we create the semaphore with the largest possible number of permits, which in practice will never all be required. The producer method addTask checks to see if the queue has been stopped—in which case its contract says it should return false—and, if not, it acquires a permit using the semaphore method tryAcquire, which does not block (unlike the more commonly used blocking method acquire, tryAcquire returns false immediately if no permits are available). This test-then-act sequence is made atomic to ensure that at any point visible to another thread the program maintains its invariant: the number of unwritten values is no greater than the number of permits available.
+
+The shutdown method sets the stopped flag in a synchronized block (the usual way of ensuring that variable writes made by one thread are visible to reads by another is for both writes and reads to take place within blocks synchronized on the same lock). Now the addTask method cannot acquire any more permits, and shutdown just has to wait until all the permits previously acquired have been returned. To do that, it calls acquire, specifying that it needs all the permits; that call will block until they are all released by the producer threads. At that point, the invariant guarantees that there are no tasks still to be written to the queue, and shutdown can be completed.
+
+Implementing BlockingQueue
+The Collections Framework provides five implementations of BlockingQueue.
+
+LinkedBlockingQueue
+This class is a thread-safe, FIFO-ordered queue, based on a linked node structure. It is the implementation of choice whenever you need an unbounded blocking queue. Even for bounded use, it may still be better than ArrayBlockingQueue (linked queues typically have higher throughput than array-based queues but less predictable performance in most concurrent applications).
+
+The two standard collection constructors create a thread-safe blocking queue with a capacity of Integer.MAX_VALUE. You can specify a lower capacity using a third constructor:
+
+LinkedBlockingQueue(int capacity)
+The ordering imposed by LinkedBlockingQueue is FIFO. Queue insertion and removal are executed in constant time; operations such as contains which require traversal of the array require linear time. The iterators are weakly consistent.
+
+ArrayBlockingQueue
+This implementation is based on a circular array—a linear structure in which the first and last elements are logically adjacent. Figure 14-6(a) shows the idea. The position labeled “head” indicates the head of the queue; each time the head element is removed from the queue, the head index is advanced. Similarly, each new element is added at the tail position, resulting in that index being advanced. When either index needs to be advanced past the last element of the array, it gets the value 0. If the two indices have the same value, the queue is either full or empty, so an implementation must separately keep track of the count of elements in the queue.
+
+A circular array in which the head and tail can be continuously advanced in this way this is better as a queue implementation than a noncircular one (e.g., the standard implementation of ArrayList, which we cover in Implementing List) in which removing the head element requires changing the position of all the remaining elements so that the new head is at position 0. Notice, though, that only the elements at the ends of the queue can be inserted and removed in constant time. If an element is to be removed from near the middle, which can be done for queues via the method Iterator.remove, then all the elements from one end must be moved along to maintain a compact representation. Figure 14-6(b) shows the element at index 6 being removed from the queue. As a result, insertion and removal of elements in the middle of the queue has time complexity O(n).
+
+Constructors for array-backed collection classes generally have a single configuration parameter, the initial length of the array. For fixed-size classes like ArrayBlockingQueue, this parameter is necessary in order to define the capacity of the collection. (For variable-size classes like ArrayList, a default initial capacity can be used, so constructors are provided that don’t require the capacity.) For ArrayBlockingQueue, the three constructors are:
+
+A circular array
+Figure 14-6. A circular array
+ArrayBlockingQueue(int capacity)
+ArrayBlockingQueue(int capacity, boolean fair)
+ArrayBlockingQueue(int capacity, boolean fair, Collection<? extends E> c)
+The Collection parameter to the last of these allows an ArrayBlockingQueue to be initialized with the contents of the specified collection, added in the traversal order of the collection’s iterator. For this constructor, the specified capacity must be at least as great as that of the supplied collection, or be at least 1 if the supplied collection is empty. Besides configuring the backing array, the last two constructors also require a boolean argument to control how the queue will handle multiple blocked requests. These will occur when multiple threads attempt to remove items from an empty queue or enqueue items on to a full one. When the queue becomes able to service one of these requests, which one should it choose? The alternatives are to require a guarantee that the queue will choose the one that has been waiting longest—that is, to implement a fair scheduling policy—or to allow the implementation to choose one. Fair scheduling sounds like the better alternative, since it avoids the possibility that an unlucky thread might be delayed indefinitely but, in practice, the benefits it provides are rarely important enough to justify incurring the large overhead that it imposes on a queue’s operation. If fair scheduling is not specified, ArrayBlockingQueue will normally approximate fair operation, but with no guarantees.
+
+The ordering imposed by ArrayBlockingQueue is FIFO. Queue insertion and removal are executed in constant time; operations such as contains which require traversal of the array require linear time. The iterators are weakly consistent.
+
+PriorityBlockingQueue
+This implementation is a thread-safe, blocking version of PriorityQueue (see Implementing Queue), with similar ordering and performance characteristics. Its iterators are fail-fast, so in normal use they will throw ConcurrentModificationException; only if the queue is quiescent will they succeed. To iterate safely over a PriorityBlockingQueue, transfer the elements to an array and iterate over that instead.
+
+DelayQueue
+This is a specialized priority queue, in which the ordering is based on the delay time for each element—the time remaining before the element will be ready to be taken from the queue. If all elements have a positive delay time—that is, none of their associated delay times has expired—an attempt to poll the queue will return null (although peek will still allow you to see the first unexpired element). If one or more elements has an expired delay time, the one with the longest-expired delay time will be at the head of the queue. The elements of a DelayQueue belong to a class that implements java.util.concurrent.Delayed:
+
+interface Delayed extends Comparable<Delayed> {
+    long getDelay(TimeUnit unit);
+}
+The getDelay method of a Delayed object returns the remaining delay associated with that object. The compareTo method (see Comparable) of Comparable must be defined to give results that are consistent with the delays of the objects being compared. This means that it will rarely be compatible with equals, so Delayed objects are not suitable for use with implementations of SortedSet and SortedMap.
+
+For example, in our to-do manager we are likely to need reminder tasks, to ensure that we follow up e-mail and phone messages that have gone unanswered. We could define a new class DelayedTask as in Example 14-2, and use it to implement a reminder queue.
+
+BlockingQueue<DelayedTask> reminderQueue = new DelayQueue<DelayedTask>();
+reminderQueue.offer(new DelayedTask (databaseCode, 1));
+reminderQueue.offer(new DelayedTask (interfaceCode, 2));
+...
+// now get the first reminder task that is ready to be processed
+DelayedTask t1 = reminderQueue.poll();
+if (t1 == null) {
+  // no reminders ready yet
+} else {
+  // process t1
+}
+Most queue operations respect delay values and will treat a queue with no unexpired elements as if it were empty. The exceptions are peek and remove, which, perhaps surprisingly, will allow you to examine the head element of a DelayQueue whether or not it is expired. Like them and unlike the other methods of Queue, collection operations on a DelayQueue do not respect delay values. For example, here are two ways of copying the elements of reminderQueue into a set:
+
+Set<DelayedTask> delayedTaskSet1 = new HashSet<DelayedTask>();
+delayedTaskSet1.addAll(reminderQueue);
+Set<DelayedTask> delayedTaskSet2 = new HashSet<DelayedTask>();
+reminderQueue.drainTo(delayedTaskSet2);
+The set delayedTaskSet1 will contain all the reminders in the queue, whereas the set delayedTaskSet2 will contain only those ready to be used.
+
+DelayQueue shares the performance characteristics of the PriorityQueue on which it is based and, like it, has fail-fast iterators. The comments on PriorityBlockingQueue iterators apply to these too.
+
+SynchronousQueue
+At first sight, you might think there is little point to a queue with no internal capacity, which is a short description of SynchronousQueue. But, in fact, it can be very useful; a thread that wants to add an element to a SynchronousQueue must wait until another thread is ready to simultaneously take it off, and the same is true—in reverse—for a thread that wants to take an element off the queue. So SynchronousQueue has the function that its name suggests, that of a rendezvous—a mechanism for synchronizing two threads. (Don’t confuse the concept of synchronizing threads in this way—allowing them to cooperate by exchanging data—with Java’s keyword synchronized, which prevents simultaneous execution of code by different threads.) There are two constructors for SynchronousQueue:
+
+SynchronousQueue()
+SynchronousQueue(boolean fair)
+Example 14-2. The class DelayedTask
+public class DelayedTask implements Delayed {
+  public final static long MILLISECONDS_IN_DAY = 60 * 60 * 24 * 1000;
+  private long endTime;     // in milliseconds after January 1, 1970
+  private Task task;
+  DelayedTask(Task t, int daysDelay) {
+    endTime = System.currentTimeMillis() + daysDelay * MILLISECONDS_IN_DAY;
+    task = t;
+  }
+  public long getDelay(TimeUnit unit) {
+    long remainingTime = endTime - System.currentTimeMillis();
+    return unit.convert(remainingTime, TimeUnit.MILLISECONDS);
+  }
+  public int compareTo(Delayed t) {
+    long thisDelay = getDelay(TimeUnit.MILLISECONDS);
+    long otherDelay = t.getDelay(TimeUnit.MILLISECONDS);
+    return (thisDelay < otherDelay) ? -1 : (thisDelay > otherDelay) ? 1 : 0;
+  }
+  Task getTask() { return task; }
+}
+A common application for SynchronousQueue is in work-sharing systems where the design ensures that there are enough consumer threads to ensure that producer threads can hand tasks over without having to wait. In this situation, it allows safe transfer of task data between threads without incurring the BlockingQueue overhead of enqueuing, then dequeuing, each task being transferred.
+
+As far as the Collection methods are concerned, a SynchronousQueue behaves like an empty Collection; Queue and BlockingQueue methods behave as you would expect for a queue with zero capacity, which is therefore always empty. The iterator method returns an empty iterator, in which hasNext always returns false.
+
+Deque
+A deque (pronounced “deck”) is a double-ended queue. Unlike a queue, in which elements can be inserted only at the tail and inspected or removed only at the head, a deque can accept elements for insertion and present them for inspection or removal at either end. Also unlike Queue, Deque’s contract specifies the ordering it will use in presenting its elements: it is a linear structure in which elements added at the tail are yielded up in the same order at the head. Used as a queue, then, a Deque is always a FIFO structure; the contract does not allow for, say, priority deques. If elements are removed from the same end (either head or tail) at which they were added, a Deque acts as a stack or LIFO (Last In First Out) structure.
+
+Deque and its subinterface BlockingDeque were introduced in Java 6. The fast Deque implementation ArrayDeque uses a circular array (see Implementing BlockingQueue), and is now the implementation of choice for stacks and queues. Concurrent deques have a special role to play in parallelization, discussed in BlockingDeque.
+
+The Deque interface (see Figure 14-7) extends Queue with methods symmetric with respect to head and tail. For clarity of naming, the Queue methods that implicitly refer to one end of the queue acquire a synonym that makes their behavior explicit for Deque. For example, the methods peek and offer, inherited from Queue, are equivalent to peekFirst and offerLast. (First and last refer to the head and tail of the deque; the JavaDoc for Deque also uses “front” and “end”.)
+
+Collection-like Methods
+
+void addFirst(E e)      // insert e at the head if there is enough space
+void addLast(E e)       // insert e at the tail if there is enough space
+void push(E e)          // insert e at the head if there is enough space
+boolean removeFirstOccurrence(Object o);
+                        // remove the first occurrence of o
+boolean removeLastOccurrence(Object o);
+                        // remove the last occurrence of o
+Iterator<E> descendingIterator()
+                        // get an iterator, returning deque elements in
+                        // reverse order
+Deque
+Figure 14-7. Deque
+The contracts for the methods addFirst and addLast are similar to the contract for the add method of Collection, but specify in addition where the element to be added should be placed, and that the exception to be thrown if it cannot be added is IllegalState- Exception. As with bounded queues, users of bounded deques should avoid these methods in favor of offerFirst and offerLast, which can report “normal” failure by means of a returned boolean value.
+
+The method name push is a synonym of addFirst, provided for the use of Deque as a stack. The methods removeFirstOccurrence and removeLastOccurrence are analogues of Collection.remove, but specify in addition exactly which occurrence of the element should be removed. The return value signifies whether an element was removed as a result of the call.
+
+Queue-like Methods
+
+boolean offerFirst(E e) // insert e at the head if the deque has space
+boolean offerLast(E e)  // insert e at the tail if the deque has space
+The method offerLast is a renaming of the equivalent method offer on the Queue interface.
+
+The methods that return null for an empty deque are:
+
+E peekFirst()          // retrieve but do not remove the first element
+E peekLast()           // retrieve but do not remove the last element
+E pollFirst()          // retrieve and remove the first element
+E pollLast()           // retrieve and remove the last element
+The methods peekFirst and pollFirst are renamings of the equivalent methods peek and poll on the Queue interface.
+
+The methods that throw an exception for an empty deque are:
+
+E getFirst()          // retrieve but do not remove the first element
+E getLast()           // retrieve but do not remove the last element
+E removeFirst()       // retrieve and remove the first element
+E removeLast()        // retrieve and remove the last element
+E pop()               // retrieve and remove the first element
+The methods getFirst and removeFirst are renamings of the equivalent methods element and remove on the Queue interface. The method name pop is a synonym forremoveFirst, again provided for stack use.
+
+Implementing Deque
+ArrayDeque
+Along with the interface Deque, Java 6 also introduced a very efficient implementation, ArrayDeque, based on a circular array like that of ArrayBlockingQueue (see Implementing BlockingQueue). It fills a gap among Queue classes; previously, if you wanted a FIFO queue to use in a single-threaded environment, you would have had to use the class LinkedList (which we cover next, but which should be avoided as a general-purpose Queue implementation), or else pay an unnecessary overhead for thread safety with one of the concurrent classes ArrayBlockingQueue or LinkedBlockingQueue. ArrayDeque is now the general-purpose implementation of choice, for both deques and FIFO queues. It has the performance characteristics of a circular array: adding or removing elements at the head or tail takes constant time. The iterators are fail-fast.
+
+LinkedList
+Among Deque implementations LinkedList is an oddity; for example, it is alone in permitting null elements, which are discouraged by the Queue interface because of the common use of null as a special value. It has been in the Collections Framework from the start, originally as one of the standard implementations of List (see Implementing List), and was retrofitted with the methods of Queue for Java 5, and those of Deque for Java 6. It is based on a linked list structure similar to those we saw in ConcurrentSkipListSet as the basis for skip lists, but with an extra field in each cell, pointing to the previous entry (see Figure 14-8). These pointers allow the list to be traversed backwards—for example, for reverse iteration, or to remove an element from the end of the list.
+
+A doubly linked list
+Figure 14-8. A doubly linked list
+As an implementation of Deque, LinkedList is unlikely to be very popular. Its main advantage, that of constant-time insertion and removal, is rivalled in Java 6—for queues and deques—by the otherwise superior ArrayDeque. Previously you would have used it in situations where thread safety isn’t an issue and you don’t require blocking behavior. Now, the only likely reason for using LinkedList as a queue or deque implementation would be that you also needed random access to the elements. With LinkedList, even that comes at a high price; because random access has to be implemented by linear search, it has time complexity of O(n).
+
+The constructors for LinkedList are just the standard ones of Collection Constructors. Its iterators are fail-fast.
+
+BlockingDeque
+Figure 14-9 shows the methods that BlockingDeque adds to BlockingQueue (see Figure 14-5). Each of the two blocking insertion methods and two removal methods of BlockingQueue is given a synonym to make explicit which end of the deque it modifies, together with a matching method to provide the same action at the other end. So offer, for example, acquires a synonym offerLast and a matching method offerFirst. As a result, the same four basic behaviors that were defined for BlockingQueue—returning a special value on failure, returning a special value on failure after a timeout, throwing an exception on failure, and blocking until success—can be applied for element insertion or removal at either end of the deque.
+
+Good load balancing algorithms will be increasingly important as multicore and multiprocessor architectures become standard. Concurrent deques are the basis of one of the best load balancing methods, work stealing. To understand work stealing, imagine a load-balancing algorithm that distributes tasks in some way—round-robin, say—to a series of queues, each of which has a dedicated consumer thread that repeatedly takes a task from the head of its queue, processes it, and returns for another. Although this scheme does provide speedup through parallelism, it has a major drawback: we can imagine two adjacent queues, one with a backlog of long tasks and a consumer thread struggling to keep up with them, and next to it an empty queue with an idle consumer waiting for work. It would clearly improve throughput if we allowed the idle thread to take a task from the head of another queue.Work stealing improves still further on this idea; observing that for the idle thread to steal work from the head of another queue risks contention for the head element, it changes the queues for deques and instructs idle threads to take a task from the tail of another thread’s deque. This turns out to be a highly efficient mechanism, and is becoming widely used.
+
+BlockingDeque
+Figure 14-9. BlockingDeque
+Implementing BlockingDeque
+The interface BlockingDeque has a single implementation, LinkedBlockingDeque. LinkedBlockingDeque is based on a doubly linked list structure like that of LinkedList. It can optionally be bounded so, besides the two standard constructors, it provides a third which can be used to specify its capacity:
+
+LinkedBlockingDeque(int capacity)
+It has similar performance characteristics to LinkedBlockingQueue—queue insertion and removal take constant time and operations such as contains, which require traversal of the queue, require linear time. The iterators are weakly consistent.
+
+Comparing Queue Implementations
+Table 14-1 shows the sequential performance, disregarding locking and CAS overheads, for some sample operations of the Deque and Queue implementations we have discussed. These results should be interesting to you in terms of understanding the behavior of your chosen implementation but, as we mentioned at the start of the chapter, they are unlikely to be the deciding factor. Your choice is more likely to be dictated by the functional and concurrency requirements of your application.
+
+In choosing a Queue, the first question to ask is whether the implementation you choose needs to support concurrent access; if not, your choice is straightforward. For FIFO ordering, choose ArrayDeque; for priority ordering, PriorityQueue.
+
+If your application does demand thread safety, you next need to consider ordering. If you need priority or delay ordering, the choice obviously must be PriorityBlockingQueue or DelayQueue, respectively. If, on the other hand, FIFO ordering is acceptable, the third
+
+Table 14-1. Comparative performance of different Queue and Deque implementations
+ 	
+offer
+
+peek
+
+poll
+
+size
+
+PriorityQueue
+
+O(log n)
+
+O(1)
+
+O(log n)
+
+O(1)
+
+ConcurrentLinkedQueue
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(n)
+
+ArrayBlockingQueue
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(1)
+
+LinkedBlockingQueue
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(1)
+
+PriorityBlockingQueue
+
+O(log n)
+
+O(1)
+
+O(log n)
+
+O(1)
+
+DelayQueue
+
+O(log n)
+
+O(1)
+
+O(log n)
+
+O(1)
+
+LinkedList
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(1)
+
+ArrayDeque
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(1)
+
+LinkedBlockingDeque
+
+O(1)
+
+O(1)
+
+O(1)
+
+O(1)
+
+question is whether you need blocking methods, as you usually will for producer-consumer problems (either because the consumers must handle an empty queue by waiting, or because you want to constrain demand on them by bounding the queue, and then producers must sometimes wait). If you don’t need blocking methods or a bound on the queue size, choose the efficient and wait-free ConcurrentLinkedQueue.
+
+If you do need a blocking queue, because your application requires support for producer-consumer cooperation, pause to think whether you really need to buffer data, or whether all you need is to safely hand off data between the threads. If you can do without buffering (usually because you are confident that there will be enough consumers to prevent data from piling up), then SynchronousQueue is an efficient alternative to the remaining FIFO blocking implementations, LinkedBlockingQueue and ArrayBlockingQueue.
+
+Otherwise, we are finally left with the choice between these two. If you cannot fix a realistic upper bound for the queue size, then you must choose LinkedBlockingQueue, as ArrayBlockingQueue is always bounded. For bounded use, you will choose between the two on the basis of performance. Their performance characteristics in Figure 14-1 are the same, but these are only the formulae for sequential access; how they perform in concurrent use is a different question. As we mentioned above, LinkedBlockingQueue performs better on the whole than ArrayBlockingQueue if more than three or four threads are being serviced. This fits with the fact that the head and tail of a LinkedBlockingQueue are locked independently, allowing simultaneous updates of both ends. On the other hand, an ArrayBlockingQueue does not have to allocate new objects with each insertion. If queue performance is critical to the success of your application, you should measure both implementations with the benchmark that means the most to you: your application itself.
+
+table of contents
+search
+Settings
+queue

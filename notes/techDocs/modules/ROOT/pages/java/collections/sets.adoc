@@ -1,5 +1,5 @@
-= Set
-:navtitle: Set
+= Sets
+:navtitle: Sets
 :description: 
 
 {description}
@@ -17,7 +17,7 @@ A `Set` is a `Collection` that
 
 ---
 
-== Set Interface Basic Operations:
+== Set Interface Basic Operations
 
 * `size` operation returns the number of elements in the `Set` (its cardinality). 
 * `isEmpty` method checks if collection is empty. 
@@ -58,7 +58,7 @@ public class FindDups {
 ```
 ---
 
-== Set Interface Bulk Operations:
+== Set Interface Bulk Operations
 
 **Bulk operations are particularly well suited to** `Sets`; when applied, they perform standard set-algebraic operations. 
 
