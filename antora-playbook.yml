@@ -46,4 +46,4 @@ asciidoc:
 
 output:
   clean: true
-  dir: _site/docs
+  # dir: _site/docs
