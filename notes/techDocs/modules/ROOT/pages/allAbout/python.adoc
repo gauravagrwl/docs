@@ -1,0 +1,8 @@
+= Python
+:navtitle: Python
+:description: 
+:page-toclevels: 7
+
+==Python
+**Python** is an interpreter that is designed to run each line of code as and when it sees it. 
+To be technically correct, Python does compile your code, but it all happens behind the scenes.

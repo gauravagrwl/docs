@@ -1,0 +1,15 @@
+= Cloud Architecture Patterns
+:navtitle: Cloud Architecture Patterns
+:description: 
+:page-toclevels: 7
+
+==Scalability
+**Scaling** is about allocating resources for an application and managing those resources
+efficiently to minimize contention. The two primary approaches to scaling:
+1. Vertical Scaling 
+2. Horizontal scaling. 
+
+Vertical scaling is the
+simpler approach, though it is more limiting. Horizontal scaling is more complex, but
+can offer scales that far exceed those that are possible with vertical scaling. Horizontal
+scaling is the more cloud-native approach.
