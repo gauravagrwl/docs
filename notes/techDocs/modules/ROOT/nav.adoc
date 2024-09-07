@@ -28,8 +28,6 @@
 **** xref:patterns/gofPattern/creationalPattern/prototypePattern.adoc[Prototype]
 **** xref:patterns/gofPattern/creationalPattern/builderPattern.adoc[Builder]
 
-** xref:patterns/cloudArcPattern/cloudArcPattern.adoc[Cloud Architecture Patterns]
-
 
 * xref:allAbout/allAbout.adoc[All About]
 ** xref:allAbout/python.adoc[Python]
