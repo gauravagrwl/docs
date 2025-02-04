@@ -28,7 +28,7 @@ jobs:
       with:
         node-version: '18'
     - name: Install Antora
-      run: npm ci
+      run: npm i antora
     - name: Generate Site
       run: npx antora antora-playbook.yml
     - name: Upload Artifacts
