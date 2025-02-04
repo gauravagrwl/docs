@@ -1,5 +1,5 @@
-title: TechDocs
-name: techDocs
+title: Cloud Notes
+name: cloud
 version: ~
 nav:
   - modules/ROOT/nav.adoc

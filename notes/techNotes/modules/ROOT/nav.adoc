@@ -3,15 +3,19 @@
 *** xref:java/collections/sets.adoc[Sets]
 *** xref:java/collections/queues.adoc[Queues]
 *** xref:java/collections/collectionSummary.adoc[Summary]
+
+* xref:springDocs/spring.adoc[Spring Framework]
+** xref:springDocs/dependencyInjection.adoc[Dependency Injections]
+
+
 * xref:effectiveJava/effectiveJava.adoc[Effective Java]
 ** .xref:effectiveJava/creatingAndDestroyingObject.adoc[Creating And Destroying Object]
 ** .xref:effectiveJava/methodsCommonToAllObjects.adoc[Methods Common to All Objects]
 ** .xref:effectiveJava/classesAndInterface.adoc[Classes and Interfaces]
 ** .xref:effectiveJava/generics.adoc[Generics]
+
 * xref:patterns/patterns.adoc[Patterns]
-
 ** xref:patterns/basicPattern/basicPatterns.adoc[Basic Patterns]
-
 *** xref:patterns/basicPattern/interfacePattern.adoc[Interface Pattern]
 *** xref:patterns/basicPattern/abstractParentClassPattern.adoc[Abstract Parent Class]
 *** xref:patterns/basicPattern/privateMethodPattern.adoc[Priavte Method]
