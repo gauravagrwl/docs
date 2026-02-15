@@ -1,6 +1,6 @@
 title: Projects
 name: projects
-version: ~
+version: 1.0
 nav:
   - modules/ROOT/nav.adoc
 asciidoc:
