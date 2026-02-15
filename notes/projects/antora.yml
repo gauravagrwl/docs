@@ -1,5 +1,5 @@
-title: Interview Compilation
-name: interview
+title: Projects
+name: projects
 version: ~
 nav:
   - modules/ROOT/nav.adoc
