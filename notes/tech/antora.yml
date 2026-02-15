@@ -1,6 +1,6 @@
 title: Notes
 name: tech
-version: 1.0
+version: ~
 nav:
   - modules/ROOT/nav.adoc
 asciidoc:
