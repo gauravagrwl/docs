@@ -1,7 +1,0 @@
-* xref:cloud/index.adoc[]
-* xref:cloud/aws/aws-index.adoc[]
-** xref:cloud/aws/awsCertifications/awsccp/awsccp.adoc[]
-*** xref:cloud/aws/awsCertifications/awsccp/domain1.adoc[Cloud Concepts]
-*** xref:cloud/aws/awsCertifications/awsccp/domain2.adoc[Security and Compliance]
-*** xref:cloud/aws/awsCertifications/awsccp/domain3.adoc[Cloud Technology and Service]
-*** xref:cloud/aws/awsCertifications/awsccp/domain4.adoc[Billing, Price, and Support]

@@ -1,0 +1,197 @@
+= Richardson Maturity Model
+:navtitle: Richardson Maturity Model
+:description: Richardson Maturity Model
+:page-toclevels: 5
+:attribute-missing: skip
+
+== Richardson Maturity Model
+The *Richardson Maturity Model* is a framework for evaluating the maturity of web services in terms of their adherence to RESTful principles. *Leonard Richardson* analyzed a hundred different web service designs and divided these designs into four categories. These categories are based on how much the web services are REST compliant.
+
+The model is designed to guide architects and developers toward more scalable, maintainable, and flexible web services. It evaluates how well a service uses HTTP and URI patterns and whether it incorporates self-descriptive responses (HATEOAS). 
+
+[mermaid]
+....
+classDiagram
+    class Level0 {
+        <<Level 0>>
+        + Single URI
+        + Single HTTP Method (POST)
+        + No URI or HATEOAS usage
+    }
+
+    class Level1 {
+        <<Level 1>>
+        + Multiple URIs
+        + Single HTTP Method (POST)
+        + No HATEOAS
+    }
+
+    class Level2 {
+        <<Level 2>>
+        + Multiple URIs
+        + Multiple HTTP Methods (GET, POST, PUT, DELETE)
+        + No HATEOAS
+    }
+
+    class Level3 {
+        <<Level 3>>
+        + Multiple URIs
+        + Multiple HTTP Methods (GET, POST, PUT, DELETE)
+        + HATEOAS (Hypermedia as the Engine of Application State)
+    }
+
+    Level0 : +Single URI
+    Level0 : +Single HTTP Method (POST)
+    Level0 : +No URI or HATEOAS usage
+
+    Level1 : +Multiple URIs
+    Level1 : +Single HTTP Method (POST)
+    Level1 : +No HATEOAS
+
+    Level2 : +Multiple URIs
+    Level2 : +Multiple HTTP Methods (GET, POST, PUT, DELETE)
+    Level2 : +No HATEOAS
+
+    Level3 : +Multiple URIs
+    Level3 : +Multiple HTTP Methods (GET, POST, PUT, DELETE)
+    Level3 : +HATEOAS (Hypermedia as the Engine of Application State)
+
+    Level0 <|-- Level1 : Transitions to
+    Level1 <|-- Level2 : Transitions to
+    Level2 <|-- Level3 : Transitions to
+
+....
+
+=== Level 0 - No REST
+*Level Zero* represents the most basic form of building service-oriented applications. The services at this level use a *single URI* and typically rely on a *single HTTP method* (usually POST) for all interactions.
+
+
+[IMPORTANT]
+====
+*Level 0* 
+Does not make use of any of *URI*, *HTTP Methods*, and *HATEOAS* capabilities.
+====
+
+Level 0 services are the most primitive form of service-oriented applications, and they do not leverage RESTful principles such as stateless communication or proper use of HTTP verbs.
+
+Ex: *SOAP Web Services* use a single URI to identify an endpoint, and HTTP POST to transfer SOAP-based payloads, effectively ignoring the rest of the HTTP verbs.
+
+Similarly, *XML-RPC-based* services send data as Plain Old XML (POX).
+
+In Level 0, all interactions are typically limited to POST requests sent to a single endpoint.
+
+==== Level 0 Characteristics
+- **Single URI**: Only one URI exists for the service.
+- **Single HTTP Method (POST)**: All interactions (e.g., fetching data, submitting data) are handled with POST.
+- **No statelessness**: The service does not rely on HTTP status codes or proper HTTP verbs to indicate different types of actions (e.g., GET, PUT).
+
+Level 0 is often used in legacy systems where flexibility and scalability are not a concern, but it’s not suitable for modern applications that need maintainability and scalability.
+
+---
+=== Level 1 - Resource
+
+At this level, services offer *multiple URIs* to represent various resources within the system, but they typically use a single HTTP verb, often POST, for interactions. Each resource is identified by a unique URI, enhancing the design compared to Level Zero.
+
+[IMPORTANT]
+====
+*Level 1*
+Makes use of *URIs*, but *does not use* *HTTP Methods* or *HATEOAS*.
+====
+
+In Level 1, services can represent different resources by providing separate URIs, such as `/users`, `/posts`, and `/comments`. This is a clear improvement over Level 0 because it allows better separation of concerns and clarity of structure. However, since all resources are manipulated with a single HTTP verb (often POST), it doesn’t fully leverage HTTP’s potential.
+
+==== Level 1 Characteristics
+- **Multiple URIs**: Each resource is identified by a unique URI (e.g., `/users`, `/posts`).
+- **Single HTTP Method (POST)**: Despite multiple URIs, interactions are still limited to POST requests, meaning there is no distinction between actions like retrieving, updating, or deleting resources.
+- **No HATEOAS**: The service doesn't use hypermedia controls for discoverability.
+
+Level 1 provides more clarity over Level 0, but it still lacks the flexibility and scalability of RESTful services that fully utilize HTTP verbs.
+
+### Example of Level 1 Service
+Suppose a service has these URIs:
+- `/users`: To represent a collection of users.
+- `/posts`: To represent a collection of posts.
+
+Each resource, however, can only be interacted with through POST requests. For example, creating or updating a user or post would all be done via POST requests to the respective URIs. While this is a step up from Level 0, it still doesn't allow clients to easily discern how to interact with the service in a meaningful way.
+
+---
+
+=== Level 2 - HTTP Verbs (CRUD)
+At Level 2, services support multiple HTTP verbs (GET, POST, PUT, DELETE) for interacting with the resources. This allows for a more structured, RESTful approach to the design, where each verb corresponds to an action on the resource (e.g., Create, Read, Update, Delete).
+
+[IMPORTANT]
+====
+*Level 2*
+Makes use of *URIs* and *HTTP Methods*, but *does not use* *HATEOAS*.
+====
+
+Level 2 services can now use **GET**, **POST**, **PUT**, and **DELETE** to manipulate resources. This is a major improvement in terms of adhering to REST principles, as each HTTP method now has a specific meaning. For example:
+- **GET** is used to retrieve a resource.
+- **POST** is used to create a new resource.
+- **PUT** is used to update an existing resource.
+- **DELETE** is used to remove a resource.
+
+However, even though HTTP methods are being used properly, Level 2 services still do not incorporate HATEOAS (Hypermedia as the Engine of Application State). This means that clients still need to rely on external documentation to understand how to interact with the service.
+
+==== Level 2 Characteristics
+- **Multiple URIs**: Resources are identified by unique URIs.
+- **Proper HTTP Methods**: GET, POST, PUT, DELETE methods are used appropriately to represent CRUD actions.
+- **No HATEOAS**: The service does not include links that guide the client to possible next steps in the interaction.
+
+### Example of Level 2 Service
+Consider a REST API with these endpoints:
+- **GET /users**: Retrieves a list of users.
+- **POST /users**: Creates a new user.
+- **PUT /users/{id}**: Updates a user's information.
+- **DELETE /users/{id}**: Deletes a user.
+
+Each resource is manipulated using the correct HTTP method. However, there are no additional links provided in the response to guide the client on what actions to take next. The client needs to know beforehand what operations are possible.
+
+---
+
+=== Level 3 - Hypermedia Controls (HATEOAS)
+Level 3 introduces the concept of **HATEOAS (Hypertext As The Engine of Application State)**. At this level, responses are designed to be self-descriptive and include links to allow clients to discover further actions that can be taken on the resources. HATEOAS enables clients to navigate the API without relying heavily on external documentation.
+
+[IMPORTANT]
+====
+*Level 3*
+Makes use of *URIs*, *HTTP Methods*, and *HATEOAS*.
+====
+
+Level 3 services are the most RESTful because they enable clients to discover and interact with the service dynamically. By including hypermedia links in the responses, the server can inform the client of possible next actions. This means that clients don't need to know all possible URIs or endpoints upfront—they can explore the API based on the links provided in the responses.
+
+#### Benefits of HATEOAS
+- **Decoupling**: Clients don’t need to hardcode URIs. They can always rely on the server’s responses to guide their next steps.
+- **Flexibility**: The server can change its URI structure or expose new features without breaking clients, as long as the relevant links are updated.
+- **Client Self-Discovery**: Clients can explore the service dynamically, reducing the need for detailed external documentation.
+
+==== Level 3 Characteristics
+- **Multiple URIs**: Resources are identified by URIs.
+- **Proper HTTP Methods**: CRUD operations are implemented using appropriate HTTP verbs.
+- **HATEOAS**: Responses include links (hypermedia) to guide clients to related resources or next possible actions.
+
+### Example of Level 3 Service with HATEOAS
+Consider the following response to a `GET /users/123` request:
+```
+[source,java]
+----
+{
+  "userId": 123,
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "_links": {
+    "self": { "href": "/users/123" },
+    "update": { "href": "/users/123/update" },
+    "delete": { "href": "/users/123/delete" },
+    "orders": { "href": "/users/123/orders" }
+  }
+}
+----
+
+
+
+
+
+
+
+
