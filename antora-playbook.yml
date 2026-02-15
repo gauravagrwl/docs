@@ -8,7 +8,6 @@ content:
     - url: ../docs
       start_paths:
         - notes/tech
-        - notes/projects
       branches:
         - 'HEAD'
 ui:
