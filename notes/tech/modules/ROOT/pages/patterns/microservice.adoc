@@ -1277,7 +1277,7 @@ Avoid:
 
 ---
 
-# 🔥 Principal-Level Interview Insight
+=== 🔥 Principal-Level Interview Insight
 
 If asked:
 
