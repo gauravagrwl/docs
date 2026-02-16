@@ -1,7 +1,9 @@
 = Large-Scale Data Processing API Design
-:toc: left
-:toclevels: 4
-:sectnums:
+// :toc: left
+// :toclevels: 4
+// :sectnums:
+:navtitle: Large-Scale Data Processing API Design
+:description:
 
 == 1. Problem Statement
 
