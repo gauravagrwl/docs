@@ -1,0 +1,68 @@
+= System Design
+:navtitle: System Design
+:description:
+
+////
+{description}
+////
+== Design Pattern
+In software engineering, a design pattern is a general reusable solution to a commonly occurring problem within a given context in software design. A design pattern is not a finished design that can be transformed directly into code. It is a description or template for how to solve a problem that can be used in many different situations. Patterns are formalized best practices that the programmers must implement themselves in the application. A design pattern is a documented best practice or core of a solution that has been applied successfully in multiple environments to solve a problem that recurs in a specific set of situations.
+
+A design pattern is an effective means to convey/communicate what has been learned about high-quality designs. The result is:
+
+* A shared language for communicating the experience gained in dealing with these recurring problems and their solutions.
+* A common vocabulary of system design elements for problem solving discussions. A means of reusing and building upon the acquired insight resulting in an improvement in the software quality in terms of its maintainability and reusability.
+* A design pattern is not an invention. A design pattern is rather a documented expression of the best way of solving a problem that is observed or discovered during the study or construction of numerous software systems.
+* Design patterns are not theoretical constructs. A design pattern can be seen as an encapsulation of a reusable solution that has been applied successfully to solve a common design problem.
+* Though design patterns refer to the best known ways of solving problems, not all best practices in problem resolution are considered as patterns. A best practice must satisfy the **Rule of Three** to be treated as a design pattern. The Rule of Three states that a given solution must be verified to be a recurring phenomenon, preferably in at least three existing systems. Otherwise, the solution is not considered as a pattern. The goal is to ensure that some community of software professionals applied the solution described by the pattern to solve software design problems. Satisfying the Rule of Three indicates that a design pattern provides a practical solution to deal with a real-world problem.
+* Design patterns do not provide solutions to every problem found in real-world software design and development. Design patterns are about providing elegant, reusable solutions to commonly encountered software development problems in a particular context. This means that a pattern that is meant to provide the best solution to a problem in a particular context may not produce an effective solution to the same problem in a different context. Sometimes, the solution proposed by the design pattern may not even be applicable in a different context.
+
+=== Design patterns address concerns in the following ways
+
+* They identify and name essential characteristics for addressing common software tasks.
+* They provide details by specifying standard criteria that may include:
+** A problem statement
+** A list of forces that constrain the solution
+** A solution that defines class roles and participants
+** A list of strategies for well-known variations
+** The consequences or trade-offs that the solution imposes
+** A list of similar or related patterns 
+
+=== Core design principles
+
+* *Information hiding and encapsulation*
+** Isolate clients from implementation details
+** Isolate clients from complexity
+
+* *Low coupling*
+** Clear boundaries between tiers
+** Program against interfaces, not classes
+
+* *High cohesion*
+** Separate presentation, business, persistence
+** Don't forget the network!
+
+* *Minimize round-trips, minimize data transfer*
+
+==== Modularity
+
+The extent to which software is divided into components, called modules, which have high internal cohesion, low coupling between each other, and simple interfaces.
+
+==== Cohesion
+A measure of the extent to which related aspects of a system are kept together in the same module, and unrelated aspects are kept out.
+
+==== Coupling
+A measure of the extent to which interdependencies exist between software modules.
+Encapsulation: creating a module to contain some algorithm or data structure, thus hiding its details behind the module's interface. Allows changes to code to be more easily made since one can be confident that 'outsiders' are not relying on too many details.
+
+**Information hiding:**
+Hiding details so as to reduce complexity.
+
+**Portability:**
+The ability for software to be run in a variety of different hardware or software environments with no or minimal changes.
+
+[WARNING]
+====
+.*Coupling is a two-headed beast*
+On the one hand, tightly coupled code is difficult to test, difficult to reuse, and difficult to understand, and it typically exhibits “whack-a- mole” bug behavior (fixing one bug results in the creation of one or more new bugs). On the other hand, a certain amount of coupling is necessary—completely uncoupled code doesn’t do anything.
+====

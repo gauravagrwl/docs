@@ -24,6 +24,9 @@
 
 ** xref:patterns/microservice.adoc[Microservices]
 
+** xref:systemDesign/system_design.adoc[System Design]
+*** xref:systemDesign/large_scale_data_processing.adoc[Large Scale Data Processing]
+
 * xref:shortNotes/allAbout.adoc[All About]
 ** xref:shortNotes/maven.adoc[Maven]
 ** xref:shortNotes/uml.adoc[Uml]

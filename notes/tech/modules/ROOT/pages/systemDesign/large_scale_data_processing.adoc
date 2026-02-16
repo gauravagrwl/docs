@@ -1,0 +1,509 @@
+= Large-Scale Data Processing API Design
+:toc: left
+:toclevels: 4
+:sectnums:
+
+== 1. Problem Statement
+
+Design and implement a highly scalable API capable of processing large volumes of data with:
+
+* High throughput (millions of records/sec)
+* Low latency
+* Fault tolerance
+* Horizontal scalability
+* Strong observability
+* Multi-region resilience
+* Security & compliance readiness
+
+Target use cases:
+
+* Bulk data ingestion (files, streams)
+* Real-time event processing
+* Batch + streaming hybrid workloads
+* AI/ML feature ingestion
+* Enterprise ETL workloads
+
+---
+
+== 2. Functional Requirements
+
+* REST/GraphQL API to ingest data
+* Support for batch upload (GB–TB scale)
+* Real-time event ingestion
+* Data validation & transformation
+* Idempotency support
+* Retry support
+* Partial failure handling
+* Multi-tenant support
+
+---
+
+== 3. Non-Functional Requirements
+
+|===
+|Requirement |Target
+
+|Availability | 99.99%
+|Scalability | Horizontal auto-scaling
+|Latency | < 100ms for ingestion ack
+|Durability | Zero data loss
+|Security | OAuth2, mTLS
+|Compliance | GDPR-ready
+|Observability | Tracing, metrics, logs
+|===
+
+---
+
+== 4. High-Level Architecture
+
+=== 4.1 Architectural Patterns Used
+
+* API Gateway Pattern
+* CQRS
+* Event-Driven Architecture
+* Saga Pattern
+* Circuit Breaker
+* Bulkhead
+* Retry + Backoff
+* Idempotent Receiver
+* Backpressure
+* Data Partitioning
+* Sharding
+* Strangler Pattern (migration)
+* Hexagonal Architecture
+* Clean Architecture
+* Sidecar Pattern
+* Rate Limiting Pattern
+* Token Bucket Algorithm
+* Cache-Aside
+* Database per Service
+
+---
+
+== 5. System Architecture (High-Level)
+
+[plantuml]
+----
+@startuml
+actor Client
+
+Client --> API_Gateway
+API_Gateway --> Auth_Service
+API_Gateway --> Ingestion_Service
+Ingestion_Service --> Message_Broker
+Message_Broker --> Stream_Processor
+Stream_Processor --> Data_Store
+Stream_Processor --> Cache
+Stream_Processor --> DLQ
+
+Ingestion_Service --> Object_Storage
+Stream_Processor --> Monitoring
+@enduml
+----
+
+---
+
+== 6. Component Design
+
+=== 6.1 API Gateway Layer
+
+Responsibilities:
+
+* Rate limiting
+* Authentication (OAuth2 / JWT)
+* Request validation
+* Throttling
+* Request routing
+* API versioning
+
+Recommended technologies:
+
+* Kong / Apigee / NGINX
+* Cloud-native Gateway (AWS API Gateway, Azure API Management)
+
+Patterns:
+
+* Token Bucket Rate Limiting
+* Circuit Breaker
+* Request Aggregator
+
+---
+
+=== 6.2 Ingestion Service
+
+Responsibilities:
+
+* Accept bulk payloads
+* Store large payload in object storage
+* Publish metadata to message queue
+* Immediate async acknowledgment
+
+Pattern:
+
+* Store-and-Forward
+* Idempotent Consumer
+
+Sequence:
+
+[plantuml]
+----
+@startuml
+Client -> API : POST /upload
+API -> ObjectStore : store file
+API -> Kafka : publish metadata
+API --> Client : 202 Accepted
+@enduml
+----
+
+---
+
+=== 6.3 Message Broker Layer
+
+Used for decoupling & buffering.
+
+Options:
+
+* Kafka
+* Pulsar
+* AWS Kinesis
+* RabbitMQ
+
+Patterns:
+
+* Event Streaming
+* Partitioning
+* Consumer Groups
+* Exactly-Once Processing (if required)
+
+Partitioning Strategy:
+
+* Hash-based partitioning
+* Tenant-based partitioning
+* Time-based partitioning
+
+---
+
+=== 6.4 Stream Processing Layer
+
+Responsibilities:
+
+* Validate
+* Transform
+* Enrich
+* Aggregate
+* Deduplicate
+* Apply business rules
+
+Tools:
+
+* Flink
+* Spark Streaming
+* Kafka Streams
+
+Patterns:
+
+* CQRS
+* Event Sourcing
+* Saga (if workflow orchestration needed)
+
+---
+
+=== 6.5 Storage Layer
+
+Types:
+
+|Use Case | Storage Type
+|---------
+|Raw Files | Object Storage (S3)
+|Hot Data | NoSQL (Cassandra/DynamoDB)
+|Transactional | PostgreSQL
+|Analytics | Data Warehouse
+|Cache | Redis
+
+Patterns:
+
+* Polyglot Persistence
+* Read Replica
+* Sharding
+* Data Partitioning
+* TTL
+* Index Optimization
+
+---
+
+== 7. Detailed Class-Level UML (Clean Architecture)
+
+[plantuml]
+----
+@startuml
+
+package "Domain" {
+  class DataRecord
+  class Validator
+  class Processor
+}
+
+package "Application" {
+  class IngestionUseCase
+  class ProcessDataUseCase
+}
+
+package "Infrastructure" {
+  class KafkaPublisher
+  class S3Repository
+  class DataRepository
+}
+
+IngestionUseCase --> S3Repository
+IngestionUseCase --> KafkaPublisher
+ProcessDataUseCase --> DataRepository
+ProcessDataUseCase --> Validator
+ProcessDataUseCase --> Processor
+
+@enduml
+----
+
+---
+
+== 8. Scaling Strategies
+
+=== 8.1 Horizontal Scaling
+
+* Stateless services
+* Auto-scaling groups
+* Kubernetes HPA
+* Scale consumers by partition count
+
+=== 8.2 Vertical Scaling
+
+* Increase CPU/memory for processors
+* Optimize GC (JVM tuning)
+
+=== 8.3 Partition Scaling
+
+* Increase Kafka partitions
+* Use consistent hashing
+
+---
+
+== 9. Failure Scenarios & Handling
+
+=== Scenario 1: Broker Down
+
+* Use retry with exponential backoff
+* Circuit breaker
+* Fail to buffer store (temporary DB)
+
+=== Scenario 2: Partial Processing Failure
+
+* Dead Letter Queue
+* Replay mechanism
+
+=== Scenario 3: Duplicate Messages
+
+* Idempotency keys
+* Deduplication table
+* Exactly-once semantics
+
+=== Scenario 4: Data Corruption
+
+* Checksum validation
+* Schema registry validation
+
+=== Scenario 5: High Traffic Spike
+
+* Rate limiting
+* Queue buffering
+* Backpressure
+* Auto-scaling
+
+---
+
+== 10. Consistency Models
+
+* Eventual consistency (default)
+* Strong consistency (transactional DB)
+* Saga pattern for distributed transactions
+
+---
+
+== 11. Security Design
+
+* OAuth2 / OpenID Connect
+* mTLS
+* WAF
+* Input sanitization
+* Encryption at rest
+* Encryption in transit
+* Role-Based Access Control
+* Data masking
+
+---
+
+== 12. Observability & Monitoring
+
+* Distributed tracing (OpenTelemetry)
+* Metrics (Prometheus)
+* Logs (ELK stack)
+* Alerting (PagerDuty)
+* SLA/SLO dashboards
+
+Golden Signals:
+
+* Latency
+* Traffic
+* Errors
+* Saturation
+
+---
+
+== 13. Multi-Region Architecture
+
+Options:
+
+* Active-Active
+* Active-Passive
+* Geo-replication
+* Global load balancer
+* Data replication strategy
+
+Trade-offs:
+
+|Strategy | Pros | Cons
+|Active-Active | High availability | Conflict resolution complexity
+|Active-Passive | Simpler | Failover delay
+
+---
+
+== 14. Performance Optimization
+
+* Batching
+* Compression (Snappy)
+* Async processing
+* Connection pooling
+* Thread pool tuning
+* Zero-copy IO
+
+---
+
+== 15. Cost Optimization
+
+* Spot instances for batch
+* Tiered storage
+* Data lifecycle policies
+* Autoscaling thresholds
+* Right-sizing instances
+
+---
+
+== 16. Advanced Topics (Interview-Level Depth)
+
+=== Backpressure Handling
+
+* Reactive Streams
+* Bounded queues
+* Adaptive throttling
+
+=== Exactly Once vs At Least Once
+
+|Model | Tradeoff
+|------
+|At Least Once | Simpler but duplicates
+|Exactly Once | Complex but safer
+
+=== Data Governance
+
+* Schema registry
+* Versioning strategy
+* Data lineage
+* Audit trails
+
+=== API Versioning Strategy
+
+* URI versioning
+* Header versioning
+* Backward compatibility
+
+---
+
+== 17. Deployment Architecture (Kubernetes)
+
+[plantuml]
+----
+@startuml
+node "Kubernetes Cluster" {
+  node "API Pod"
+  node "Ingestion Pod"
+  node "Processor Pod"
+}
+
+node "Kafka Cluster"
+node "DB Cluster"
+node "Object Storage"
+
+API Pod --> Ingestion Pod
+Ingestion Pod --> Kafka Cluster
+Processor Pod --> Kafka Cluster
+Processor Pod --> DB Cluster
+@enduml
+----
+
+---
+
+== 18. Tradeoff Discussion (Architect Round)
+
+Questions Interviewer May Ask:
+
+* Why not synchronous processing?
+* Why Kafka over RabbitMQ?
+* How to guarantee zero data loss?
+* How to handle schema evolution?
+* How to migrate monolith to this architecture?
+* What if tenant A overwhelms system?
+* CAP theorem tradeoffs?
+* What metrics will you monitor?
+
+---
+
+== 19. End-to-End Flow Summary
+
+1. Client uploads large file
+2. API stores file in object storage
+3. Metadata published to Kafka
+4. Stream processors consume
+5. Validate & transform
+6. Persist to storage
+7. Update cache
+8. Send completion event
+
+---
+
+== 20. Final Architecture Characteristics
+
+* Fully decoupled
+* Horizontally scalable
+* Resilient to failures
+* Multi-region ready
+* Cloud-native
+* Observable
+* Secure
+* Extensible
+
+---
+
+== 21. Interview Tip Section
+
+When explaining:
+
+1. Start with functional requirements
+2. Clarify scale (TPS, data size)
+3. Choose async processing
+4. Justify technology choices
+5. Discuss tradeoffs
+6. Cover failure handling
+7. Add security & observability
+8. Close with cost optimization
+
+---
+
+= END OF DESIGN
